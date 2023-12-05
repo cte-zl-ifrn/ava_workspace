@@ -83,11 +83,19 @@ service_running() {
     if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
         echo "ON"
     else
-        echo ""
+        echo "OFF"
     fi
 }
 
-# service_running $1
+db_wait() {
+    echo_info "Aguardando a base de dados..."
+    until docker compose exec -u postgres $1 psql -A -c '\l'>/dev/null 2>&1; do
+        E=$(docker compose logs --tail 1 $1 | tail -1)
+        echo_warning "Postgres is unavailable - sleeping. ERROR: $E"
+        sleep 1
+    done
+    echo_success "Conectado com sucesso!"
+}
 
 
 case $1 in
@@ -138,12 +146,50 @@ case $1 in
   db)
     case $2 in
         down)
-            docker compose down
+            docker compose down $1
             ;;
         exec)
             exec_service $1
             ;;
         psql)
+            echo exec_service $1
+            ;;
+        logs)
+            docker compose logs $1 -f
+            ;;
+        restart)
+            restart_service $1
+            ;;
+        status)
+            echo $1 is `service_running $1`
+            ;;
+        undeploy)
+            docker compose down $1
+
+            echo_info "Remove volume do DB"
+            sudo rm -rf $AVA_PWD/volumes/db_data
+            ;;
+        up)
+            if [[ `service_running $1` == 'OFF' ]]; then 
+                docker compose up -d $1
+            fi
+            db_wait $1
+            ;;
+        wait)
+            db_wait $1
+            ;;
+        *)
+            echo -n "As instruções são: backs, build, deploy, down, logs, restart, status, undeploy, up"            
+            ;;
+    esac
+    ;;
+
+  cache | moodle | nginx | painel)
+    case $2 in
+        down)
+            docker compose down $1
+            ;;
+        exec)
             exec_service $1
             ;;
         logs)
@@ -153,42 +199,15 @@ case $1 in
             restart_service $1
             ;;
         status)
-            docker compose ps | grep $1
-            ;;
-        undeploy)
-            docker compose down
-
-            echo_info "Remove volume do DB"
-            sudo rm -rf $AVA_PWD/volumes/db_data
+            echo $1 is `service_running $1`
             ;;
         up)
-            if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
-                echo_info "O banco já está em execução"
-            else
-                docker compose up -d $@ $1
-                _/$SERVICE_NAME/wait
-            fi
-
-            docker compose up $1
-            ;;
-        wait)
-            if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
-                echo_info "O banco já está em execução"
-            else
-                docker compose up -d $@ $1
-                _/$SERVICE_NAME/wait
-            fi
-
             docker compose up $1
             ;;
         *)
             echo -n "As instruções são: backs, build, deploy, down, logs, restart, status, undeploy, up"            
             ;;
     esac
-    ;;
-
-  ava | cache | moodle | nginx | php | postgres | redis | web)
-    echo -n "down, exec, logs, restart, run, shell, up"
     ;;
 
   *)
