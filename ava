@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+
+NO_COLOR='\033[0m'
+SERVICE_NAME=$(basename $(dirname $0))
+
+AVA_PWD=~/projetos/IFRN/ava
+
+source .env
+
+echo_warning() {
+    ORANGE_COLOR='\033[0;33m'
+    echo ${@:3} -e "$ORANGE_COLOR WARN: $(date +\"%F\ %T\") $1$NO_COLOR"
+}
+
+echo_danger() {
+    RED_COLOR='\033[0;31m'
+    echo ${@:3} -e "$RED_COLOR DANG: $(date +\"%F\ %T\") $1$NO_COLOR"
+}
+
+echo_info() {
+    BLUE_COLOR='\033[1;34m'
+    echo ${@:3} -e "$BLUE_COLOR INFO: $(date +\"%F\ %T\") $1$NO_COLOR"
+}
+
+echo_success() {
+    GREEN_COLOR='\033[1;32m'
+    echo ${@:3} -e "$GREEN_COLOR SUCC: $(date +\"%F\ %T\") $1$NO_COLOR"
+}
+
+restart_service() {
+    docker compose down $1
+    docker compose up -d $1
+}
+
+exec_service() {
+    if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
+        docker compose exec $1 $@
+    else
+        echo_warning "O container $COMPOSE_PROJECT_NAME-$1-1 não está em execução, executando com run"
+        docker compose run --rm $1 $@
+    fi
+}
+
+setup_env() {
+    echo cp -r $AVA_PWD/integracao/painel-ava/confs/examples $AVA_PWD/integracao/painel-ava/confs/enabled
+    echo ""; echo_info "Parar o mundo"
+    docker compose down
+
+    if ! grep -q 'PAINEL-AVA' /etc/hosts; then
+        echo '
+
+    ######################################################################
+    ## PAINEL-AVA
+    ######################################################################
+    127.0.0.2    ava
+
+        ' | sudo tee -a /etc/hosts
+    fi
+
+    mkdir $AVA_PWD/integracao
+    git clone git@gitlab.ifrn.edu.br:ead/ava/integracao/painel-ava.git          $AVA_PWD/integracao/painel-ava
+
+    mkdir -p $AVA_PWD/volumes/moodle_data
+    chmod 777 $AVA_PWD/volumes/moodle_data
+}
+
+deploy_env() {
+    setup_env
+
+    echo ""; echo_info "Sobe o cache e o db em background"
+    restart_service cache
+    restart_service db
+
+    echo ""; echo_info "Construir as imagens"
+    docker compose build
+
+    echo ""; echo_info "Reiniciando o mundo novamente"
+    docker compose up -d
+    docker compose logs -f
+}
+
+service_running() {
+    if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
+        echo "ON"
+    else
+        echo ""
+    fi
+}
+
+# service_running $1
+
+
+case $1 in
+  env)
+    case $2 in
+        backs)
+            restart_service cache
+            restart_service db
+            ;;
+        build)
+            docker compose build
+            ;;
+        deploy)
+            deploy_env
+            ;;
+        down)
+            docker compose down
+            ;;
+        logs)
+            docker compose logs -f
+            ;;
+        restart)
+            restart_service
+            ;;
+        setup)
+            setup_env
+            ;;
+        status)
+            docker compose ps
+            ;;
+        undeploy)
+            docker compose down
+
+            echo_info "Remove AVA confs"
+            rm -rf $AVA_PWD/integracao/painel-ava/confs/enabled/*
+
+            echo_info "Remove AVA volumes"
+            sudo rm -rf $AVA_PWD/volumes
+            ;;
+        up)
+            docker compose up
+            ;;
+        *)
+            echo -n "As instruções são: backs, build, deploy, down, logs, restart, status, undeploy, up"            
+            ;;
+    esac
+    ;;
+  db)
+    case $2 in
+        down)
+            docker compose down
+            ;;
+        exec)
+            exec_service $1
+            ;;
+        psql)
+            exec_service $1
+            ;;
+        logs)
+            docker compose logs $1 -f
+            ;;
+        restart)
+            restart_service $1
+            ;;
+        status)
+            docker compose ps | grep $1
+            ;;
+        undeploy)
+            docker compose down
+
+            echo_info "Remove volume do DB"
+            sudo rm -rf $AVA_PWD/volumes/db_data
+            ;;
+        up)
+            if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
+                echo_info "O banco já está em execução"
+            else
+                docker compose up -d $@ $1
+                _/$SERVICE_NAME/wait
+            fi
+
+            docker compose up $1
+            ;;
+        wait)
+            if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
+                echo_info "O banco já está em execução"
+            else
+                docker compose up -d $@ $1
+                _/$SERVICE_NAME/wait
+            fi
+
+            docker compose up $1
+            ;;
+        *)
+            echo -n "As instruções são: backs, build, deploy, down, logs, restart, status, undeploy, up"            
+            ;;
+    esac
+    ;;
+
+  ava | cache | moodle | nginx | php | postgres | redis | web)
+    echo -n "down, exec, logs, restart, run, shell, up"
+    ;;
+
+  *)
+    echo -n "Os contextos são: env, db, cache, moodle, nginx, painel"
+    ;;
+esac

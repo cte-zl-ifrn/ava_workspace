@@ -1,0 +1,2 @@
+include:
+  - ../integracao/painel-ava/docker-compose.yml
