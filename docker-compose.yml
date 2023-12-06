@@ -1,2 +1,112 @@
-include:
-  - ../integracao/painel-ava/docker-compose.yml
+services:
+
+  cache:
+    image: redis:7.2-alpine
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=changeme
+    volumes:
+      # init settings, executed only on deploy
+      - "./src/postgres/:/docker-entrypoint-initdb.d"
+      # database data
+      - "~/projetos/IFRN/ava/volumes/db_data:/var/lib/postgresql/data"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 3s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  nginx:
+    image: nginx:1.23.3-alpine
+    volumes:
+      # confs
+      - ./confs/enabled/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./src/nginx/error_pages:/usr/share/nginx/error_pages
+    ports:
+      - 80:80
+    depends_on:
+      - painel
+      - ava
+
+  painel:
+    image: ctezlifrn/avapainel:1.1.0
+    build:
+      context: ./src
+      # additional_contexts:
+      #   django-adminlte3: ../django-adminlte3
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=changeme
+
+      - DJANGO_DEBUG=true
+      - DJANGO_ALLOWED_HOSTS=ava,localhost
+
+      # 1. Crie uma chave, em qualquer ferramenta, de no mímino 50 caracteres
+      - DJANGO_SECRET_KEY=changeme
+
+      # 2. Crie um project no Sentr.io e pegue a DNS
+      # SENTRY_DNS=https://key@id.ingest.sentry.io/id
+
+      # 3. Crie uma aplicação oAuth2 no SUAP e pegue o client_id e o client_secret
+      - SUAP_OAUTH_CLIENT_ID=changeme
+      - SUAP_OAUTH_CLIENT_SECRET=changeme
+      - SUAP_OAUTH_BASE_URL=https://suap.ifrn.edu.br
+      - SUAP_OAUTH_REDIRECT_URI=http://ava/painel/authenticate/
+
+      # 4. Crie uma aplicação oAuth2 no SUAP e pegue o client_id e o client_secret
+      - SUAP_INTEGRADOR_KEY=changeme
+
+      # 5. Se cadastre no https://userway.org/ e registre o token da conta
+      - SHOW_USERWAY=True
+      - USERWAY_ACCOUNT=changeme
+
+      - SHOW_VLIBRAS=True
+
+    volumes:
+      # - '../django-adminlte3:/apps/django-adminlte3'
+      - './src:/apps/app'
+      - '~/projetos/IFRN/ava/volumes/painel_media:/var/media'
+      - '~/projetos/IFRN/ava/volumes/painel_static:/var/static'
+    depends_on:
+      cache:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  ava:
+    image: ctezlifrn/moodle:moodle4.1.4-php8.1-release002
+    # image: ctezlifrn/moodle:moodle4.3.0-php8.2-release003
+    # image: registry.gitlab.com/cte-infra/moodle:020
+    env_file:
+      - ./confs/enabled/db.env
+      - ./confs/enabled/cache.env
+      - ./confs/enabled/ava.env
+    volumes:
+      # Configs
+      # - '../moodle__image/src/php/config.php:/var/www/html/config.php'
+      - './confs/enabled/extra.ini:/usr/local/etc/php/conf.d/extra.ini'
+      # Plugins
+      - '../moodle__enrol_suap:/var/www/html/enrol/suap'
+      - '../moodle__auth_suap:/var/www/html/auth/suap'
+      - '../moodle__local_suap:/var/www/html/local/suap'
+      - '../moodle__block_suapattendance:/var/www/html/blocks/suapattendance'
+      - '../moodle__theme_moove:/var/www/html/theme/moove'
+      - '../moodle__profilefield_json:/var/www/html/user/profile/field/json'
+      - '../H5P.TextEditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php'
+      - '../H5P.TextEditor/h5peditor-tinymce.js:/var/www/html/h5p/h5plib/v124/joubel/editor/scripts/h5peditor-tinymce.js'
+      # Data
+      - './volumes/moodle_data:/var/moodledata'
+    depends_on:
+      db:
+        condition: service_healthy
