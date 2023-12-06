@@ -69,7 +69,7 @@ services:
 
       # 5. Se cadastre no https://userway.org/ e registre o token da conta
       - SHOW_USERWAY=True
-      - USERWAY_ACCOUNT=changeme
+      - USERWAY_ACCOUNT=wPr7IBWf6k
 
       - SHOW_VLIBRAS=True
 
