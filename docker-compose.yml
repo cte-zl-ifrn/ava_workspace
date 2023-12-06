@@ -75,7 +75,7 @@ services:
 
     volumes:
       # - '../django-adminlte3:/apps/django-adminlte3'
-      - './src:/apps/app'
+      - '~/projetos/IFRN/ava/integracao/painel-ava/src:/apps/app'
       - '~/projetos/IFRN/ava/volumes/painel_media:/var/media'
       - '~/projetos/IFRN/ava/volumes/painel_static:/var/static'
     depends_on:
