@@ -58,10 +58,32 @@ setup_env() {
     fi
 
     mkdir $AVA_PWD/integracao
-    git clone git@gitlab.ifrn.edu.br:ead/ava/integracao/painel-ava.git          $AVA_PWD/integracao/painel-ava
+    git clone git@gitlab.ifrn.edu.br:ead/ava/integracao/painel-ava.git $AVA_PWD/integracao/painel-ava
 
-    mkdir -p $AVA_PWD/volumes/moodle_data
-    chmod 777 $AVA_PWD/volumes/moodle_data
+    mkdir $AVA_PWD/lms
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/moodle.git $AVA_PWD/lms/moodle
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/local_suap.git $AVA_PWD/lms/local_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/theme_moove.git $AVA_PWD/lms/theme_moove
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/auth_suap.git $AVA_PWD/lms/auth_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/enrol_suap.git $AVA_PWD/lms/enrol_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/block_suap.git $AVA_PWD/lms/block_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/format_suap.git $AVA_PWD/lms/format_suap
+
+    sudo mkdir -p $AVA_PWD/volumes/moodle_data
+    sudo chmod 777 $AVA_PWD/volumes/moodle_data
+
+    if [[ -f ~/.zshrc ]]; then
+        if ! grep -q 'ava_workspace' ~/.zshrc; then
+            echo 'PATH=$PATH:~/projetos/IFRN/ava/ava_workspace' >> ~/.zshrc
+        fi
+    fi
+
+    if [[ -f ~/.bashrc ]]; then
+        if ! grep -q 'ava_workspace' ~/.bashrc; then
+            echo 'PATH=$PATH:~/projetos/IFRN/ava/ava_workspace' >> ~/.bashrc
+        fi
+    fi
+
 }
 
 deploy_env() {
