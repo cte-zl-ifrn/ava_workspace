@@ -1,6 +1,6 @@
 # AVA ecosystem
 
-> ***APENAS PARA DESENVOLVIMENTO NO IFRN, não suba em produção usando em projeto, existem outro projeto para isso.***
+> **_APENAS PARA DESENVOLVIMENTO NO IFRN, não suba em produção usando em projeto, existem outro projeto para isso._**
 
 O Ecossistema AVA do IFRN é composto do sistema de integração (Painel e Middlware) e vários Moodles construídos como imagens Docker.
 
@@ -13,7 +13,17 @@ O Ecossistema AVA do IFRN é composto do sistema de integração (Painel e Middl
 Este projeto em docker compose assume que você não tenha aplicações rodando na porta 80, ou seja, pare o serviço que está na porta 80 ou faça as configurações necessárias vocês mesmo. O script `./ava` tem atalhos para a maioria dos comandos que você necessitará. A instrução `./ava env setup` no seu PC criará automaticamente uma entrada no `/etc/hosts` para o hostname `ava` apontando para `127.0.02`. Isso é necessário para simplificar o cenário de desenvolvimento local.
 
 ```bash
-curl https://gist.githubusercontent.com/cte-ead/4cbd7b0eda1be2a2622027aff6d219b2/raw/7bc5bd588167554343fc80845a5d149f4c64ce60/ava-setup-env-dev | bash
+curl https://gist.githubusercontent.com/cte-ead/4cbd7b0eda1be2a2622027aff6d219b2/raw/7bc5bd588167554343fc80845a5d149f4c64ce60/ava-setup-env-dev | $SHELL
+
+cd ~/projetos/IFRN/ava/ava_workspace
+
+code ava_workspace.code-workspace
+```
+
+Uma vez no VS Code, abra o terminal e:
+
+```bash
+ava env deploy
 ```
 
 > O **Painel** estará disponível em http://ava/painel, o primeiro usuário a acessar será declarado como superusuário e poderá fazer tudo no sistema.
@@ -26,6 +36,11 @@ ava painel down
 ava painel debug
 ```
 
-### Configurar o PATH do para o script ava
+## Padrões de editor
 
-Se você configurar o `PATH` o script poderá ser executado como `ava` ao invés de `./ava`.
+Neste projeto usamos o editor VSCode como referência, com os seguintes plugins instaldos:
+
+-   ms-python.black-formatter
+-   esbenp.prettier-vscode
+-   bmewburn.vscode-intelephense-client
+-   njpwerner.autodocstring

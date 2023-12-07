@@ -1,43 +1,64 @@
 {
-	"folders": [
-		{
-			"name": "ava_workspace",
-			"path": "."
-		},
-		{
-			"name": "../integration/painel-ava",
-			"path": "../integration/painel-ava"
-		},
-		{
-			"name": "../lms/local_suap",
-			"path": "../lms/local_suap"
-		},
-		{
-			"name": "../lms/theme_moove",
-			"path": "../lms/theme_moove"
-		},
-		{
-			"name": "../lms/auth_suap",
-			"path": "../lms/auth_suap"
-		},
-		{
-			"name": "../lms/enrol_suap",
-			"path": "../lms/enrol_suap"
-		},
-		{
-			"name": "../lms/block_suap",
-			"path": "../lms/block_suap"
-		},
-		{
-			"name": "../lms/format_suap",
-			"path": "../lms/format_suap"
-		}
-	],
-	"settings": {
-		"[python]": {
-			"editor.defaultFormatter": "ms-python.black-formatter"
-		},
-		"editor.formatOnPaste": true,
-		"editor.formatOnSave": true
-	}
+    "folders": [
+        {
+            "name": "ava_workspace",
+            "path": "."
+        },
+        {
+            "name": "../integration/painel-ava",
+            "path": "../integration/painel-ava"
+        },
+        {
+            "name": "../lms/moodle",
+            "path": "../lms/moodle"
+        },
+        {
+            "name": "../lms/local_suap",
+            "path": "../lms/local_suap"
+        },
+        {
+            "name": "../lms/theme_moove",
+            "path": "../lms/theme_moove"
+        },
+        {
+            "name": "../lms/auth_suap",
+            "path": "../lms/auth_suap"
+        },
+        {
+            "name": "../lms/enrol_suap",
+            "path": "../lms/enrol_suap"
+        },
+        {
+            "name": "../lms/block_suap",
+            "path": "../lms/block_suap"
+        },
+        {
+            "name": "../lms/format_suap",
+            "path": "../lms/format_suap"
+        },
+        {
+            "name": "../h5p/codehighlighter",
+            "path": "../h5p/codehighlighter"
+        },
+        {
+            "name": "../h5p/texteditor",
+            "path": "../h5p/texteditor"
+        }
+    ],
+    "settings": {
+        "[python]": {
+            "editor.defaultFormatter": "ms-python.black-formatter"
+        },
+        "editor.formatOnPaste": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[php]": {
+            "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+        },
+        "prettier.tabWidth": 4,
+        "prettier.useEditorConfig": true,
+        "prettier.vueIndentScriptAndStyle": true,
+        "prettier.withNodeModules": true,
+        "terminal.integrated.stickyScroll.enabled": true
+    }
 }

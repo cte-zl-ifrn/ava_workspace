@@ -61,13 +61,17 @@ setup_env() {
     git clone git@gitlab.ifrn.edu.br:ead/ava/integration/painel-ava.git $AVA_PWD/integration/painel-ava
 
     mkdir $AVA_PWD/lms
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/moodle.git $AVA_PWD/lms/moodle
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/local_suap.git $AVA_PWD/lms/local_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/theme_moove.git $AVA_PWD/lms/theme_moove
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/auth_suap.git $AVA_PWD/lms/auth_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/enrol_suap.git $AVA_PWD/lms/enrol_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/block_suap.git $AVA_PWD/lms/block_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/format_suap.git $AVA_PWD/lms/format_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/moodle.git             $AVA_PWD/lms/moodle
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/local_suap.git         $AVA_PWD/lms/local_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/theme_moove.git        $AVA_PWD/lms/theme_moove
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/auth_suap.git          $AVA_PWD/lms/auth_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/enrol_suap.git         $AVA_PWD/lms/enrol_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/block_suap.git         $AVA_PWD/lms/block_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/format_suap.git        $AVA_PWD/lms/format_suap
+
+    mkdir $AVA_PWD/h5p
+    git clone git@gitlab.ifrn.edu.br:ead/ava/h5p/codehighlighter.git    $AVA_PWD/h5p/codehighlighter
+    git clone git@gitlab.ifrn.edu.br:ead/ava/h5p/texteditor.git         $AVA_PWD/h5p/texteditor
 
     sudo mkdir -p $AVA_PWD/volumes/moodle_data
     sudo chmod 777 $AVA_PWD/volumes/moodle_data
@@ -119,7 +123,6 @@ db_wait() {
     echo_success "Conectado com sucesso!"
 }
 
-
 case $1 in
   env)
     case $2 in
@@ -165,81 +168,122 @@ case $1 in
             ;;
     esac
     ;;
-  db)
+  db | cache | moodle | nginx | painel)
     case $2 in
         down)
             docker compose down $1
             ;;
         exec)
             exec_service $1
+            ;;
+        logs)
+            docker compose logs $1 -f
+            ;;
+        restart)
+            restart_service $1
+            ;;
+        shell)
+            if [[ `service_running $1` == 'ON' ]]; then 
+                docker compose exec $1 bash
+            else
+                docker compose run --rm $1 bash
+            fi
+            ;;
+        status)
+            echo $1 is `service_running $1`
+            ;;
+        up)
+            case $2 in
+                db)
+                    if [[ `service_running $1` == 'OFF' ]]; then 
+                        docker compose up -d $1
+                    fi
+                    db_wait $1
+                    ;;
+                *)
+                    docker compose up $1
+                    ;;
+            esac
+            ;;
+        build)
+            case $1 in
+                painel | moodle)
+                    docker compose build $1
+                    ;;
+                *)
+                    echo -n "Só os serviços 'painel' e 'moodle' tem instruções 'build'"
+                    ;;
+            esac
+            ;;
+        publish)
+            echo "[$2]"
+            case $1 in
+                moodle)
+                    docker login gitlab.ifrn.edu.br:4567
+                    docker compose push $1
+                    ;;
+                *)
+                    echo -n "Só o serviço 'moodle' tem instruções 'publish'"
+                    ;;
+            esac
+            ;;
+        cli)
+            case $1 in
+                cache)
+                    if [[ `service_running $1` == 'OFF' ]]; then 
+                        docker compose up -d $1
+                    fi
+                    db_wait $1
+                    ;;
+                *)
+                    echo -n "Só o serviço 'cache' tem instruções 'cli'"
+                    ;;
+            esac
             ;;
         psql)
-            echo exec_service $1
-            ;;
-        logs)
-            docker compose logs $1 -f
-            ;;
-        restart)
-            restart_service $1
-            ;;
-        status)
-            echo $1 is `service_running $1`
+            case $1 in
+                db)
+                    docker compose exec -u postgres $1 psql
+                    ;;
+                *)
+                    echo -n "Só o serviço 'db' tem instruções 'psql'"
+                    ;;
+            esac
             ;;
         undeploy)
-            docker compose down $1
+            case $1 in
+                db)
+                    docker compose down $1
 
-            echo_info "Remove volume do DB"
-            sudo rm -rf $AVA_PWD/volumes/db_data
+                    echo_info "Remove volume do DB"
+                    sudo rm -rf $AVA_PWD/volumes/db_data
+                    ;;
+                *)
+                    echo -n "Só o serviço 'db' tem instruções 'undeploy'"
+                    ;;
+            esac
             ;;
-        up)
-            if [[ `service_running $1` == 'OFF' ]]; then 
-                docker compose up -d $1
-            fi
-            db_wait $1
-            ;;
+
         wait)
-            db_wait $1
+            case $1 in
+                db)
+                    db_wait $1
+                    ;;
+                *)
+                    echo -n "Só o serviço 'db' tem instruções 'wait'"
+                    ;;
+            esac
             ;;
         *)
-            echo -n "As instruções são: backs, build, deploy, down, logs, restart, status, undeploy, up"            
-            ;;
-    esac
-    ;;
-
-  cache | moodle | nginx | painel)
-    case $2 in
-        down)
-            docker compose down $1
-            ;;
-        exec)
-            exec_service $1
-            ;;
-        logs)
-            docker compose logs $1 -f
-            ;;
-        restart)
-            restart_service $1
-            ;;
-        status)
-            echo $1 is `service_running $1`
-            ;;
-        up)
-            docker compose up $1
-            ;;
-        *)
-            echo -n "As instruções são: backs, build, deploy, down, logs, restart, status, undeploy, up"            
+            echo "As instruções são: down exec logs psql restart shell status up"
+            echo "Se for cache, também tem: cli"
+            echo "Se for db, também tem: psql undeploy wait"
+            echo "Se for moodle, também tem: build publish"
             ;;
     esac
     ;;
 
   *)
     echo -n "Os contextos são: env, db, cache, moodle, nginx, painel"
-    if [[ "$SHELL" == '/bin/bash' ]]; then
-        echo " é bash"
-    fi
-    if [[ "$SHELL" == '/bin/zsh' ]]; then
-        echo " é zsh"
-    fi
-
     ;;
 esac

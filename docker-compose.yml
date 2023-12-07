@@ -1,118 +1,122 @@
 services:
 
-  cache:
-    image: redis:7.2-alpine
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 3s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
+    cache:
+        image: redis:7.2-alpine
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 3s
+            timeout: 3s
+            retries: 3
+            start_period: 10s
 
-  db:
-    image: postgres:16-alpine
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=changeme
-    volumes:
-      # init settings, executed only on deploy
-      - "./src/postgres/:/docker-entrypoint-initdb.d"
-      # database data
-      - "~/projetos/IFRN/ava/volumes/db_data:/var/lib/postgresql/data"
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres" ]
-      interval: 3s
-      timeout: 3s
-      retries: 3
-      start_period: 10s
+    db:
+        image: postgres:16-alpine
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=changeme
+        volumes:
+            # init settings, executed only on deploy
+            - "./src/postgres/:/docker-entrypoint-initdb.d"
+            # database data
+            - "~/projetos/IFRN/ava/volumes/db_data:/var/lib/postgresql/data"
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "postgres"]
+            interval: 3s
+            timeout: 3s
+            retries: 3
+            start_period: 10s
 
-  nginx:
-    image: nginx:1.23.3-alpine
-    volumes:
-      # confs
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/error_pages:/usr/share/nginx/error_pages
-    ports:
-      - 80:80
-    depends_on:
-      - painel
-      - ava
+    nginx:
+        image: nginx:1.23.3-alpine
+        volumes:
+            # confs
+            - ./nginx/conf.d:/etc/nginx/conf.d
+            - ./nginx/error_pages:/usr/share/nginx/error_pages
+        ports:
+            - 80:80
+        depends_on:
+          - painel
+          - moodle
 
-  painel:
-    image: ctezlifrn/avapainel:1.1.0
-    build:
-      context: ./src
-      # additional_contexts:
-      #   django-adminlte3: ../django-adminlte3
-    environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=changeme
+    painel:
+        image: ctezlifrn/avapainel:1.1.0
+        build:
+            context: ~/projetos/IFRN/ava/integration/painel-ava/src
+            # additional_contexts:
+            #   django-adminlte3: ../django-adminlte3
+        environment:
+            - POSTGRES_HOST=db
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=changeme
 
-      - DJANGO_DEBUG=true
-      - DJANGO_ALLOWED_HOSTS=ava,localhost
+            - DJANGO_DEBUG=true
+            - DJANGO_ALLOWED_HOSTS=ava,localhost
 
-      # 1. Crie uma chave, em qualquer ferramenta, de no mímino 50 caracteres
-      - DJANGO_SECRET_KEY=changeme
+            # 1. Crie uma chave, em qualquer ferramenta, de no mímino 50 caracteres
+            - DJANGO_SECRET_KEY=changeme
 
-      # 2. Crie um project no Sentr.io e pegue a DNS
-      # SENTRY_DNS=https://key@id.ingest.sentry.io/id
+            # 2. Crie um project no Sentr.io e pegue a DNS
+            # SENTRY_DNS=https://key@id.ingest.sentry.io/id
 
-      # 3. Crie uma "Aplicações OAUTH2" no SUAP e pegue o client_id e o client_secret
-      - SUAP_OAUTH_CLIENT_ID=k9B1Ah3SZyTmZFMLDT8jeVMhVlySHV4mviUF9z9D
-      - SUAP_OAUTH_CLIENT_SECRET=k2bjgONnkE7gmKd2NIPOzzhIlHLRz5ifNCanEwJTR8SmjeimYQenEYjj6nU7xHImZ0PdkFp8FsalYk40Y8sjy47pZ0JIna96Y3Zu65SqvfVnl0KGR5vufXzCAhk05f4f
-      - SUAP_OAUTH_BASE_URL=https://suap.ifrn.edu.br
-      - SUAP_OAUTH_REDIRECT_URI=http://ava/painel/authenticate/
+            # 3. Crie uma "Aplicações OAUTH2" no SUAP e pegue o client_id e o client_secret
+            - SUAP_OAUTH_CLIENT_ID=k9B1Ah3SZyTmZFMLDT8jeVMhVlySHV4mviUF9z9D
+            - SUAP_OAUTH_CLIENT_SECRET=k2bjgONnkE7gmKd2NIPOzzhIlHLRz5ifNCanEwJTR8SmjeimYQenEYjj6nU7xHImZ0PdkFp8FsalYk40Y8sjy47pZ0JIna96Y3Zu65SqvfVnl0KGR5vufXzCAhk05f4f
+            - SUAP_OAUTH_BASE_URL=https://suap.ifrn.edu.br
+            - SUAP_OAUTH_REDIRECT_URI=http://ava/painel/authenticate/
 
-      # 4. Atribua o token de integração do SUAP
-      - SUAP_INTEGRADOR_KEY=changeme
+            # 4. Atribua o token de integração do SUAP
+            - SUAP_INTEGRADOR_KEY=changeme
 
-      # 5. Se cadastre no https://userway.org/ e registre o token da conta
-      - SHOW_USERWAY=True
-      - USERWAY_ACCOUNT=wPr7IBWf6k
+            # 5. Se cadastre no https://userway.org/ e registre o token da conta
+            - SHOW_USERWAY=True
+            - USERWAY_ACCOUNT=wPr7IBWf6k
 
-      - SHOW_VLIBRAS=True
+            - SHOW_VLIBRAS=True
 
-    volumes:
-      # - '../django-adminlte3:/apps/django-adminlte3'
-      - '~/projetos/IFRN/ava/integracao/painel-ava/src:/apps/app'
-      - '~/projetos/IFRN/ava/volumes/painel_media:/var/media'
-      - '~/projetos/IFRN/ava/volumes/painel_static:/var/static'
-    depends_on:
-      cache:
-        condition: service_healthy
-      db:
-        condition: service_healthy
+        volumes:
+            # - '../django-adminlte3:/apps/django-adminlte3'
+            - '~/projetos/IFRN/ava/integration/painel-ava/src:/apps/app'
+            - '~/projetos/IFRN/ava/volumes/painel_media:/var/media'
+            - '~/projetos/IFRN/ava/volumes/painel_static:/var/static'
+        depends_on:
+            cache:
+                condition: service_healthy
+            db:
+                condition: service_healthy
 
-  ava:
-    image: registry.gitlab.com/cte-infra/moodle:020
-    environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=changeme
-      - CFG_ENV=local
-      - CFG_DEBUG=false
-      - CFG_WWWROOT=http://ava
-      - CFG_ADMINUSER=admin
-      - CFG_ADMINPASS=admin
-      - CFG_ADMINEMAIL=admin@server.local
-      - CFG_FULLNAME=AVA do Campus ZL do IFRN
-      - CFG_SHORTNAME=AVA-ZL
-      - POSTGRES_DATABASE=moodle
-    volumes:
-      # Configs
-      - './moodle/extra.ini:/usr/local/etc/php/conf.d/extra.ini'
-      # # Plugins
-      # - '../moodle__enrol_suap:/var/www/html/enrol/suap'
-      # - '../moodle__auth_suap:/var/www/html/auth/suap'
-      # - '../moodle__local_suap:/var/www/html/local/suap'
-      # - '../moodle__block_suapattendance:/var/www/html/blocks/suapattendance'
-      # - '../moodle__theme_moove:/var/www/html/theme/moove'
-      # - '../moodle__profilefield_json:/var/www/html/user/profile/field/json'
-      # - '../H5P.TextEditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php'
-      # - '../H5P.TextEditor/h5peditor-tinymce.js:/var/www/html/h5p/h5plib/v124/joubel/editor/scripts/h5peditor-tinymce.js'
-      # Data
-      - '~/projetos/IFRN/ava/volumes/moodle_data:/var/moodledata'
-    depends_on:
-      db:
-        condition: service_healthy
+    moodle:
+        image: gitlab.ifrn.edu.br:4567/ead/ava/lms/moodle:021
+        build:
+            context: ~/projetos/IFRN/ava/lms/moodle
+            # additional_contexts:
+            #   django-adminlte3: ../django-adminlte3    
+        environment:
+            - POSTGRES_HOST=db
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=changeme
+            - CFG_ENV=local
+            - CFG_DEBUG=false
+            - CFG_WWWROOT=http://ava
+            - CFG_ADMINUSER=admin
+            - CFG_ADMINPASS=admin
+            - CFG_ADMINEMAIL=admin@server.local
+            - CFG_FULLNAME=AVA do Campus ZL do IFRN
+            - CFG_SHORTNAME=AVA-ZL
+            - POSTGRES_DATABASE=postgres
+        volumes:
+            # Plugins
+            - '~/projetos/IFRN/ava/lms/enrol_suap:/var/www/html/enrol/suap'
+            - '~/projetos/IFRN/ava/lms/auth_suap:/var/www/html/auth/suap'
+            - '~/projetos/IFRN/ava/lms/local_suap:/var/www/html/local/suap'
+            - '~/projetos/IFRN/ava/lms/block_suap:/var/www/html/blocks/suap'
+            - '~/projetos/IFRN/ava/lms/theme_moove:/var/www/html/theme/moove'
+            # - '~/projetos/IFRN/ava/lms/profilefield_json:/var/www/html/user/profile/field/json'
+            # - '~/projetos/IFRN/ava/h5p/texteditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php'
+            # - '~/projetos/IFRN/ava/h5p/texteditor/h5peditor-tinymce.js:/var/www/html/h5p/h5plib/v124/joubel/editor/scripts/h5peditor-tinymce.js'
+            # Data
+            - '~/projetos/IFRN/ava/volumes/moodle_data:/var/moodledata'
+        depends_on:
+            cache:
+                condition: service_healthy
+            db:
+                condition: service_healthy
