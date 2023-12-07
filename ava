@@ -58,7 +58,7 @@ setup_env() {
     fi
 
     mkdir $AVA_PWD/integracao
-    git clone git@gitlab.ifrn.edu.br:ead/ava/integracao/painel-ava.git $AVA_PWD/integracao/painel-ava
+    git clone git@gitlab.ifrn.edu.br:ead/ava/integration/painel-ava.git $AVA_PWD/integration/painel-ava
 
     mkdir $AVA_PWD/lms
     git clone git@gitlab.ifrn.edu.br:ead/ava/lms/moodle.git $AVA_PWD/lms/moodle
@@ -234,5 +234,12 @@ case $1 in
 
   *)
     echo -n "Os contextos são: env, db, cache, moodle, nginx, painel"
+    if [[ "$SHELL" == '/bin/bash' ]]; then
+        echo " é bash"
+    fi
+    if [[ "$SHELL" == '/bin/zsh' ]]; then
+        echo " é zsh"
+    fi
+
     ;;
 esac
