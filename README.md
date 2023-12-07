@@ -1,36 +1,31 @@
-# wordpress__workspace
-Workspace para desenvolvimento do Wordpress no ZL/IFRN
+# AVA ecosystem
 
-> O pasta `projetos` usada neste tutorial é de sua escolha e responsabilidade.
+> ***APENAS PARA DESENVOLVIMENTO NO IFRN, não suba em produção usando em projeto, existem outro projeto para isso.***
 
-Baixar o projeto e abrir
+O Ecossistema AVA do IFRN é composto do sistema de integração (Painel e Middlware) e vários Moodles construídos como imagens Docker.
 
-```bash
-mkdir -p ~/projetos/IFRN/ava
-git clone git@gitlab.ifrn.edu.br:ead/ava/ava_workspace.git ~/projetos/IFRN/ava/ava_workspace
-~/projetos/IFRN/ava/ava_workspace
-./clonar.sh
+> Neste projeto usamos o [Docker](https://docs.docker.com/engine/install/) e o [Docker Compose Plugin](https://docs.docker.com/compose/install/compose-plugin/#:~:text=%20Install%20the%20plugin%20manually%20%F0%9F%94%97%20%201,of%20Compose%20you%20want%20to%20use.%20More%20) (não o [docker-compose](https://docs.docker.com/compose/install/) 😎). O setup foi todo testado usando o Linux, Mac OS e WSL2.
 
-docker compose build
-docker compose up -d 
+> Os containeres terão o prefixo `ava-`, que é um acrônimo para "Ambiente Virtual de ensino e Aprendizagem".
 
-code ava_workspace.code-workspace
-```
+## Como iniciar o desenvolvimento
 
-Restaure o banco (em outro terminal)
-
-
-
-Acesse http://localhost/portal/
-
-Para restaurar o portal:
-1. Coloque o arquivo de restore do **banco** em `~/projetos/IFRN/cms/backups/portal`
-2. Coloque o arquivo de restore do **wordpress** em `~/projetos/IFRN/cms/portal/wordpress`
-
-
-Para parar tudo e limpar tudo.
+Este projeto em docker compose assume que você não tenha aplicações rodando na porta 80, ou seja, pare o serviço que está na porta 80 ou faça as configurações necessárias vocês mesmo. O script `./ava` tem atalhos para a maioria dos comandos que você necessitará. A instrução `./ava env setup` no seu PC criará automaticamente uma entrada no `/etc/hosts` para o hostname `ava` apontando para `127.0.02`. Isso é necessário para simplificar o cenário de desenvolvimento local.
 
 ```bash
-cd ~/projetos/IFRN/cms/cms_workspace
-docker compose down && sudo rm -rf ../volumes/data-portal && docker compose up
+curl https://gist.githubusercontent.com/cte-ead/4cbd7b0eda1be2a2622027aff6d219b2/raw/390b3f1f43ecef92b299577e418291a01a5e5b67/ava-setup-env-dev | bash
 ```
+
+> O **Painel** estará disponível em http://ava/painel, o primeiro usuário a acessar será declarado como superusuário e poderá fazer tudo no sistema.
+> O **Moodle** estará disponível em http://ava, o primeiro usuário a acessar será declarado como superusuário e poderá fazer tudo no sistema.
+
+Caso você deseje fazer debug do Painel AVA, tente:
+
+```bash
+ava painel down
+ava painel debug
+```
+
+### Configurar o PATH do para o script ava
+
+Se você configurar o `PATH` o script poderá ser executado como `ava` ao invés de `./ava`.
