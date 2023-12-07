@@ -1,47 +1,47 @@
 {
     "folders": [
         {
-            "name": "ava_workspace",
+            "name": "🛠️/ava_workspace",
             "path": "."
         },
         {
-            "name": "../integration/painel-ava",
+            "name": "🤖/painel-ava",
             "path": "../integration/painel-ava"
         },
         {
-            "name": "../lms/moodle",
+            "name": "📚/moodle",
             "path": "../lms/moodle"
         },
         {
-            "name": "../lms/local_suap",
+            "name": "📚/local_suap",
             "path": "../lms/local_suap"
         },
         {
-            "name": "../lms/theme_moove",
+            "name": "📚/theme_moove",
             "path": "../lms/theme_moove"
         },
         {
-            "name": "../lms/auth_suap",
+            "name": "📚/auth_suap",
             "path": "../lms/auth_suap"
         },
         {
-            "name": "../lms/enrol_suap",
+            "name": "📚/enrol_suap",
             "path": "../lms/enrol_suap"
         },
         {
-            "name": "../lms/block_suap",
-            "path": "../lms/block_suap"
+            "name": "📚/block_suapattendance",
+            "path": "../lms/block_suapattendance"
         },
         {
-            "name": "../lms/format_suap",
+            "name": "📚/format_suap",
             "path": "../lms/format_suap"
         },
         {
-            "name": "../h5p/codehighlighter",
+            "name": "🎭/codehighlighter",
             "path": "../h5p/codehighlighter"
         },
         {
-            "name": "../h5p/texteditor",
+            "name": "🎭/texteditor",
             "path": "../h5p/texteditor"
         }
     ],
@@ -59,6 +59,7 @@
         "prettier.useEditorConfig": true,
         "prettier.vueIndentScriptAndStyle": true,
         "prettier.withNodeModules": true,
-        "terminal.integrated.stickyScroll.enabled": true
+        "terminal.integrated.stickyScroll.enabled": true,
+        "editor.fontFamily": "Meslo LG S for Powerline, Consolas, 'Courier New', monospace"
     }
 }
