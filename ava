@@ -58,20 +58,20 @@ setup_env() {
     fi
 
     mkdir $AVA_PWD/integration
-    git clone git@gitlab.ifrn.edu.br:ead/ava/integration/painel-ava.git $AVA_PWD/integration/painel-ava
+    git clone git@gitlab.ifrn.edu.br:ead/ava/integration/painel-ava.git    $AVA_PWD/integration/painel-ava
 
     mkdir $AVA_PWD/lms
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/moodle.git             $AVA_PWD/lms/moodle
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/local_suap.git         $AVA_PWD/lms/local_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/theme_moove.git        $AVA_PWD/lms/theme_moove
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/auth_suap.git          $AVA_PWD/lms/auth_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/enrol_suap.git         $AVA_PWD/lms/enrol_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/block_suap.git         $AVA_PWD/lms/block_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/format_suap.git        $AVA_PWD/lms/format_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/moodle.git                $AVA_PWD/lms/moodle
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/local_suap.git            $AVA_PWD/lms/local_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/theme_moove.git           $AVA_PWD/lms/theme_moove
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/auth_suap.git             $AVA_PWD/lms/auth_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/enrol_suap.git            $AVA_PWD/lms/enrol_suap
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/block_suapattendance.git  $AVA_PWD/lms/block_suapattendance
+    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/format_suap.git           $AVA_PWD/lms/format_suap
 
     mkdir $AVA_PWD/h5p
-    git clone git@gitlab.ifrn.edu.br:ead/ava/h5p/codehighlighter.git    $AVA_PWD/h5p/codehighlighter
-    git clone git@gitlab.ifrn.edu.br:ead/ava/h5p/texteditor.git         $AVA_PWD/h5p/texteditor
+    git clone git@gitlab.ifrn.edu.br:ead/ava/h5p/codehighlighter.git       $AVA_PWD/h5p/codehighlighter
+    git clone git@gitlab.ifrn.edu.br:ead/ava/h5p/texteditor.git            $AVA_PWD/h5p/texteditor
 
     sudo mkdir -p $AVA_PWD/volumes/moodle_data
     sudo chmod 777 $AVA_PWD/volumes/moodle_data
@@ -102,6 +102,7 @@ deploy_env() {
 
     echo ""; echo_info "Reiniciando o mundo novamente"
     docker compose up -d
+    # noreplyaddress
     docker compose logs -f
 }
 
@@ -168,7 +169,7 @@ case $1 in
             ;;
     esac
     ;;
-  db | cache | moodle | nginx | painel)
+  db | cache | ava | nginx | painel)
     case $2 in
         down)
             docker compose down $1
@@ -207,23 +208,23 @@ case $1 in
             ;;
         build)
             case $1 in
-                painel | moodle)
+                painel | ava)
                     docker compose build $1
                     ;;
                 *)
-                    echo -n "Só os serviços 'painel' e 'moodle' tem instruções 'build'"
+                    echo -n "Só os serviços 'painel' e 'ava' tem instruções 'build'"
                     ;;
             esac
             ;;
         publish)
             echo "[$2]"
             case $1 in
-                moodle)
+                ava)
                     docker login gitlab.ifrn.edu.br:4567
                     docker compose push $1
                     ;;
                 *)
-                    echo -n "Só o serviço 'moodle' tem instruções 'publish'"
+                    echo -n "Só o serviço 'ava' tem instruções 'publish'"
                     ;;
             esac
             ;;
@@ -278,12 +279,12 @@ case $1 in
             echo "As instruções são: down exec logs psql restart shell status up"
             echo "Se for cache, também tem: cli"
             echo "Se for db, também tem: psql undeploy wait"
-            echo "Se for moodle, também tem: build publish"
+            echo "Se for ava, também tem: build publish"
             ;;
     esac
     ;;
 
   *)
-    echo -n "Os contextos são: env, db, cache, moodle, nginx, painel"
+    echo -n "Os contextos são: env, db, cache, ava, nginx, painel"
     ;;
 esac
