@@ -57,7 +57,7 @@ setup_env() {
         ' | sudo tee -a /etc/hosts
     fi
 
-    mkdir $AVA_PWD/integracao
+    mkdir $AVA_PWD/integration
     git clone git@gitlab.ifrn.edu.br:ead/ava/integration/painel-ava.git $AVA_PWD/integration/painel-ava
 
     mkdir $AVA_PWD/lms
