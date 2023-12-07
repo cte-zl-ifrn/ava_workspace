@@ -5,8 +5,32 @@
 			"path": "."
 		},
 		{
-			"name": "../integracao/painel-ava",
-			"path": "../integracao/painel-ava"
+			"name": "../integration/painel-ava",
+			"path": "../integration/painel-ava"
+		},
+		{
+			"name": "../lms/local_suap",
+			"path": "../lms/local_suap"
+		},
+		{
+			"name": "../lms/theme_moove",
+			"path": "../lms/theme_moove"
+		},
+		{
+			"name": "../lms/auth_suap",
+			"path": "../lms/auth_suap"
+		},
+		{
+			"name": "../lms/enrol_suap",
+			"path": "../lms/enrol_suap"
+		},
+		{
+			"name": "../lms/block_suap",
+			"path": "../lms/block_suap"
+		},
+		{
+			"name": "../lms/format_suap",
+			"path": "../lms/format_suap"
 		}
 	],
 	"settings": {
