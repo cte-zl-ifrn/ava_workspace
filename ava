@@ -57,6 +57,8 @@ setup_env() {
         ' | sudo tee -a /etc/hosts
     fi
 
+    git clone git@gitlab.ifrn.edu.br:ead/sass.git                          ~/projetos/IFRN/sass
+
     mkdir $AVA_PWD/integration
     git clone git@gitlab.ifrn.edu.br:ead/ava/integration/painel-ava.git    $AVA_PWD/integration/painel-ava
 
@@ -124,6 +126,8 @@ db_wait() {
     echo_success "Conectado com sucesso!"
 }
 
+# ALL_SERVICES=`grep -Po '^    [a-z].*:$' docker-compose.yml | sed -e 's/:/ | /g' | xargs`
+
 case $1 in
   env)
     case $2 in
@@ -169,7 +173,7 @@ case $1 in
             ;;
     esac
     ;;
-  db | cache | ava | nginx | painel)
+  db | cache | ava | nginx | painel | sass_painel)
     case $2 in
         down)
             docker compose down $1
@@ -285,6 +289,6 @@ case $1 in
     ;;
 
   *)
-    echo -n "Os contextos são: env, db, cache, ava, nginx, painel"
+    echo "Os contextos são: env, db, cache, ava, nginx,  sass_painel"
     ;;
 esac
