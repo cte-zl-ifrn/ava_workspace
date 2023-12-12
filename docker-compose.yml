@@ -15,7 +15,7 @@ services:
             - POSTGRES_PASSWORD=changeme
         volumes:
             # init settings, executed only on deploy
-            - "./src/postgres/:/docker-entrypoint-initdb.d"
+            - "./postgres/:/docker-entrypoint-initdb.d"
             # database data
             - "~/projetos/IFRN/ava/volumes/db_data:/var/lib/postgresql/data"
         healthcheck:
@@ -122,7 +122,23 @@ services:
 
     sass_painel:
         image: gitlab.ifrn.edu.br:4567/ead/sass:001
-        command: ["pysass", "--watch", "-m", "--sourcemap-file=/css/main.css.map", "--sourcemap-contents", "--sourcemap-embed", "--omit-sourcemap-url", "--sourcemap-root=/scss", "-t", "expanded", "-I", "/scss", "/scss/main.scss", "/css/main.css"]
+        command:
+            [
+                "pysass",
+                "--watch",
+                "-m",
+                "--sourcemap-file=/css/main.css.map",
+                "--sourcemap-contents",
+                "--sourcemap-embed",
+                "--omit-sourcemap-url",
+                "--sourcemap-root=/scss",
+                "-t",
+                "expanded",
+                "-I",
+                "/scss",
+                "/scss/main.scss",
+                "/css/main.css",
+            ]
         volumes:
             - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/scss:/scss"
             - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/css:/css"
