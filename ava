@@ -5,6 +5,8 @@ SERVICE_NAME=$(basename $(dirname $0))
 
 AVA_PWD=~/projetos/IFRN/ava
 
+cd $AVA_PWD/ava_workspace
+
 source .env
 
 echo_warning() {
