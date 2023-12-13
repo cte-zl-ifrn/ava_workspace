@@ -67,10 +67,10 @@ services:
             - SUAP_INTEGRADOR_KEY=changeme
 
             # 5. Se cadastre no https://userway.org/ e registre o token da conta
-            - SHOW_USERWAY=True
+            - SHOW_USERWAY=False
             - USERWAY_ACCOUNT=wPr7IBWf6k
 
-            - SHOW_VLIBRAS=True
+            - SHOW_VLIBRAS=False
 
         volumes:
             # - '../django-adminlte3:/apps/django-adminlte3'

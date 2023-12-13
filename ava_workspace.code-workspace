@@ -5,6 +5,10 @@
             "path": "."
         },
         {
+            "name": "🛠️/favicons",
+            "path": "../../common/favicons/"
+        },
+        {
             "name": "🤖/painel-ava",
             "path": "../integration/painel-ava"
         },
