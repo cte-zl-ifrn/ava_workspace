@@ -12,7 +12,7 @@ services:
         image: postgres:16-alpine
         environment:
             - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=changeme
+            - POSTGRES_PASSWORD=postgres
         volumes:
             # init settings, executed only on deploy
             - "./postgres/:/docker-entrypoint-initdb.d"
@@ -40,13 +40,13 @@ services:
     painel:
         image: ctezlifrn/avapainel:1.1.0
         build:
-            context: ~/projetos/IFRN/ava/integration/painel-ava
+            context: ~/projetos/IFRN/ava/integration/painel-ava/src/python
             # additional_contexts:
             #   django-adminlte3: ../django-adminlte3
         environment:
             - POSTGRES_HOST=db
             - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=changeme
+            - POSTGRES_PASSWORD=postgres
 
             - DJANGO_DEBUG=true
             - DJANGO_ALLOWED_HOSTS=ava,localhost
@@ -74,7 +74,7 @@ services:
 
         volumes:
             # - '../django-adminlte3:/apps/django-adminlte3'
-            - "~/projetos/IFRN/ava/integration/painel-ava/src:/apps/app"
+            - "~/projetos/IFRN/ava/integration/painel-ava/src/python:/apps/app"
             - "~/projetos/IFRN/ava/volumes/painel_media:/var/media"
             - "~/projetos/IFRN/ava/volumes/painel_static:/var/static"
         depends_on:
@@ -92,7 +92,7 @@ services:
         environment:
             - POSTGRES_HOST=db
             - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=changeme
+            - POSTGRES_PASSWORD=postgres
             - CFG_ENV=local
             - CFG_DEBUG=false
             - CFG_WWWROOT=http://ava
@@ -120,25 +120,25 @@ services:
             db:
                 condition: service_healthy
 
-    sass_painel:
-        image: gitlab.ifrn.edu.br:4567/ead/sass:001
-        command:
-            [
-                "pysass",
-                "--watch",
-                "-m",
-                "--sourcemap-file=/css/main.css.map",
-                "--sourcemap-contents",
-                "--sourcemap-embed",
-                "--omit-sourcemap-url",
-                "--sourcemap-root=/scss",
-                "-t",
-                "expanded",
-                "-I",
-                "/scss",
-                "/scss/main.scss",
-                "/css/main.css",
-            ]
-        volumes:
-            - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/scss:/scss"
-            - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/css:/css"
+    # sass_painel:
+    #     image: gitlab.ifrn.edu.br:4567/ead/sass:001
+    #     command:
+    #         [
+    #             "pysass",
+    #             "--watch",
+    #             "-m",
+    #             "--sourcemap-file=/css/main.css.map",
+    #             "--sourcemap-contents",
+    #             "--sourcemap-embed",
+    #             "--omit-sourcemap-url",
+    #             "--sourcemap-root=/scss",
+    #             "-t",
+    #             "expanded",
+    #             "-I",
+    #             "/scss",
+    #             "/scss/main.scss",
+    #             "/css/main.css",
+    #         ]
+    #     volumes:
+    #         - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/scss:/scss"
+    #         - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/css:/css"

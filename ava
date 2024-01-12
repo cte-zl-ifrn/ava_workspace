@@ -1,296 +1,342 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import re
+import os
+import sys
+import subprocess
+import time
 
-NO_COLOR='\033[0m'
-SERVICE_NAME=$(basename $(dirname $0))
 
-AVA_PWD=~/projetos/IFRN/ava
+COMPANY_NAME = "IFRN"
+PROJECT_NAME = "ava"
+HOME = os.environ.get("HOME")
+COMPANY_DIR = f"{HOME}/projetos/{COMPANY_NAME}"
+PROJECT_DIR = f"{COMPANY_DIR}/{PROJECT_NAME}"
+WORKSPACE_DIR = f"{PROJECT_DIR}/{PROJECT_NAME}_workspace"
 
-cd $AVA_PWD/ava_workspace
 
-source .env
+class Color:
+    ENDC = "\033[0m"
 
-echo_warning() {
-    ORANGE_COLOR='\033[0;33m'
-    echo ${@:3} -e "$ORANGE_COLOR WARN: $(date +\"%F\ %T\") $1$NO_COLOR"
-}
+    def r(text: str) -> str:
+        """Returns a *red* string"""
+        return f"\033[91m{text}{Color.ENDC}"
 
-echo_danger() {
-    RED_COLOR='\033[0;31m'
-    echo ${@:3} -e "$RED_COLOR DANG: $(date +\"%F\ %T\") $1$NO_COLOR"
-}
+    def b(text: str) -> str:
+        """Returns a *blue* string"""
+        return f"\033[94m{text}{Color.ENDC}"
 
-echo_info() {
-    BLUE_COLOR='\033[1;34m'
-    echo ${@:3} -e "$BLUE_COLOR INFO: $(date +\"%F\ %T\") $1$NO_COLOR"
-}
+    def g(text: str) -> str:
+        """Returns a *green* string"""
+        return f"\033[92m{text}{Color.ENDC}"
 
-echo_success() {
-    GREEN_COLOR='\033[1;32m'
-    echo ${@:3} -e "$GREEN_COLOR SUCC: $(date +\"%F\ %T\") $1$NO_COLOR"
-}
+    def c(text: str) -> str:
+        """Returns a *cyan* string"""
+        return f"\033[96m{text}{Color.ENDC}"
 
-restart_service() {
-    docker compose down $1
-    docker compose up -d $1
-}
+    def m(text: str) -> str:
+        """Returns a *magenta* string"""
+        return f"\033[95m{text}{Color.ENDC}"
 
-exec_service() {
-    if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
-        docker compose exec $1 $@
-    else
-        echo_warning "O container $COMPOSE_PROJECT_NAME-$1-1 não está em execução, executando com run"
-        docker compose run --rm $1 $@
-    fi
-}
+    def y(text: str) -> str:
+        """Returns a *yellow* string"""
+        return f"\033[93m{text}{Color.ENDC}"
 
-setup_env() {
-    echo cp -r $AVA_PWD/integracao/painel-ava/confs/examples $AVA_PWD/integracao/painel-ava/confs/enabled
-    echo ""; echo_info "Parar o mundo"
-    docker compose down
+    def s(text: str) -> str:
+        """Returns a *strong* string"""
+        return f"\033[1m{text}{Color.ENDC}"
 
-    if ! grep -q 'PAINEL-AVA' /etc/hosts; then
-        echo '
+    def u(text: str) -> str:
+        """Returns a *underlined* string"""
+        return f"\033[4m{text}{Color.ENDC}"
 
-    ######################################################################
-    ## PAINEL-AVA
-    ######################################################################
-    127.0.0.2    ava
 
-        ' | sudo tee -a /etc/hosts
-    fi
+class Helper:
+    _images = None
+    _services = None
+    _commands = None
 
-    git clone git@gitlab.ifrn.edu.br:ead/sass.git                          ~/projetos/IFRN/sass
+    @classmethod
+    def print_help(cls):
+        print("Comandos disponíveis:\n")
+        print("_images", Helper._images)
+        for k, c in cls.commands.items():
+            fixed = f"{k:8}"
+            print(f"  {Color.m(fixed)} - {c.description}{Color.c(', '.join(c.scopes))}")
+        exit()
 
-    mkdir $AVA_PWD/integration
-    git clone git@gitlab.ifrn.edu.br:ead/ava/integration/painel-ava.git    $AVA_PWD/integration/painel-ava
+    @classmethod
+    @property
+    def commands(cls):
+        if cls._commands is None:
+            cls._commands = {}
+            for k, v in Commands.__dict__.items():
+                if "function" in str(v):
+                    match = re.search(r"^(.*)(Aplica-se a: )(.*)$", v.__doc__)
+                    v.scopes = (
+                        match.group(3)
+                        .replace("$services_names$", ",".join(cls.services))
+                        .split(",")
+                    )
+                    v.description = match.group(1) + match.group(2)
+                    cls._commands[k] = v
 
-    mkdir $AVA_PWD/lms
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/moodle.git                $AVA_PWD/lms/moodle
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/local_suap.git            $AVA_PWD/lms/local_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/theme_moove.git           $AVA_PWD/lms/theme_moove
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/auth_suap.git             $AVA_PWD/lms/auth_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/enrol_suap.git            $AVA_PWD/lms/enrol_suap
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/block_suapattendance.git  $AVA_PWD/lms/block_suapattendance
-    git clone git@gitlab.ifrn.edu.br:ead/ava/lms/format_suap.git           $AVA_PWD/lms/format_suap
+        return cls._commands
 
-    mkdir $AVA_PWD/h5p
-    git clone git@gitlab.ifrn.edu.br:ead/ava/h5p/codehighlighter.git       $AVA_PWD/h5p/codehighlighter
-    git clone git@gitlab.ifrn.edu.br:ead/ava/h5p/texteditor.git            $AVA_PWD/h5p/texteditor
+    @classmethod
+    @property
+    def command(cls):
+        arg_command = sys.argv[1]
+        for k, v in Helper.commands.items():
+            if k == arg_command:
+                return v
+        return None
 
-    sudo mkdir -p $AVA_PWD/volumes/moodle_data
-    sudo chmod 777 $AVA_PWD/volumes/moodle_data
+    @classmethod
+    @property
+    def command_name(cls):
+        return sys.argv[1]
 
-    if [[ -f ~/.zshrc ]]; then
-        if ! grep -q 'ava_workspace' ~/.zshrc; then
-            echo 'PATH=$PATH:~/projetos/IFRN/ava/ava_workspace' >> ~/.zshrc
-        fi
-    fi
+    @classmethod
+    @property
+    def services(cls):
+        def is_service(line):
+            result = re.search("^  (\\w*):$", line)
+            if result is not None:
+                if len(result.groups()) == 1 and result.group(1) != "default":
+                    return result.group(1)
 
-    if [[ -f ~/.bashrc ]]; then
-        if ! grep -q 'ava_workspace' ~/.bashrc; then
-            echo 'PATH=$PATH:~/projetos/IFRN/ava/ava_workspace' >> ~/.bashrc
-        fi
-    fi
+        def is_image(line):
+            result = re.search("^(    image: )(.*)$", line)
+            if result is not None:
+                if len(result.groups()) > 0:
+                    print(result.group(2))
+                    return result.group(2)
 
-}
+        if cls._services is None:
+            f = os.popen("docker compose config")
+            cls._services = []
+            cls._images = []
+            for line in f.read().splitlines():
+                if is_service(line):
+                    cls._services.append(is_service(line))
+                if is_image(line):
+                    cls._images.append(is_image(line))
+        return cls._services
 
-deploy_env() {
-    setup_env
+    @classmethod
+    @property
+    def service(cls):
+        return sys.argv[0]
 
-    echo ""; echo_info "Sobe o cache e o db em background"
-    restart_service cache
-    restart_service db
+    @classmethod
+    @property
+    def service_name(cls):
+        return cls.scope_name if cls.scope_name != "env" else ""
 
-    echo ""; echo_info "Construir as imagens"
-    docker compose build
+    @staticmethod
+    def service_is_running(service_name):
+        return True
+        # TODO: Descobrir se determinado serviço está em execução
+        return Helper.execute(f"docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1")
 
-    echo ""; echo_info "Reiniciando o mundo novamente"
-    docker compose up -d
-    # noreplyaddress
-    docker compose logs -f
-}
+    @classmethod
+    @property
+    def scope_name(cls):
+        _scope_name = sys.argv[2] if len(sys.argv) >= 3 else "env"
+        if not hasattr(Helper.command, "scopes"):
+            raise Exception(f"Comando {Helper.command_name} não possui scopes")
+        if _scope_name not in Helper.command.scopes:
+            _scope_name = None
+        return _scope_name
 
-service_running() {
-    if [[ `docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1` ]]; then 
-        echo "ON"
-    else
-        echo "OFF"
-    fi
-}
+    @classmethod
+    def validate(cls):
+        if len(sys.argv) == 1:
+            print(Color.r("Informe ao menos um comando"), "\n")
+            cls.print_help()
 
-db_wait() {
-    echo_info "Aguardando a base de dados..."
-    until docker compose exec -u postgres $1 psql -A -c '\l'>/dev/null 2>&1; do
-        E=$(docker compose logs --tail 1 $1 | tail -1)
-        echo_warning "Postgres is unavailable - sleeping. ERROR: $E"
-        sleep 1
-    done
-    echo_success "Conectado com sucesso!"
-}
+        if cls.command is None:
+            print(f"Comando {Color.r(cls.command_name)} não reconhecido.\n")
+            cls.print_help()
 
-# ALL_SERVICES=`grep -Po '^    [a-z].*:$' docker-compose.yml | sed -e 's/:/ | /g' | xargs`
+        if cls.scope_name is None:
+            print(
+                f"Para o comando {Color.m(cls.command_name)}, os serviços disponíveis são: "
+                + Color.c(", ".join(cls.command.scopes))
+            )
+            exit()
 
-case $1 in
-  env)
-    case $2 in
-        backs)
-            restart_service cache
-            restart_service db
-            ;;
-        build)
-            docker compose build
-            ;;
-        deploy)
-            deploy_env
-            ;;
-        down)
-            docker compose down
-            ;;
-        logs)
-            docker compose logs -f
-            ;;
-        restart)
-            restart_service
-            ;;
-        setup)
-            setup_env
-            ;;
-        status)
-            docker compose ps
-            ;;
-        undeploy)
-            docker compose down
+    @staticmethod
+    def execute(executable_file, *args):
+        # print(Color.b("Executando: "), f"{executable_file} {' '.join(args)}")
+        p = subprocess.Popen(
+            executable_file + " " + " ".join(args),
+            stdin=sys.stdin,
+            stdout=sys.stdout,
+            stderr=sys.stdout,
+            shell=True,
+            cwd=WORKSPACE_DIR,
+        )
+        p.wait()
 
-            echo_info "Remove AVA confs"
-            rm -rf $AVA_PWD/integracao/painel-ava/confs/enabled/*
+    @staticmethod
+    def writeShellFile(filename):
+        with open(f"{HOME}/{filename}", "r") as f:
+            if f"{PROJECT_NAME}_workspace" not in f.read():
+                Helper.execute(f"echo 'PATH=$PATH:{WORKSPACE_DIR}' >> ~/{filename}")
+                print("Lembre-se de executar o comando abaixo:")
+                print(Color.g(f"source ~/{filename}"), "\n")
 
-            echo_info "Remove AVA volumes"
-            sudo rm -rf $AVA_PWD/volumes
-            ;;
-        up)
-            docker compose up
-            ;;
-        *)
-            echo -n "As instruções são: backs, build, deploy, down, logs, restart, status, undeploy, up"            
-            ;;
-    esac
-    ;;
-  db | cache | ava | nginx | painel | sass_painel)
-    case $2 in
-        down)
-            docker compose down $1
-            ;;
-        exec)
-            exec_service $1
-            ;;
-        logs)
-            docker compose logs $1 -f
-            ;;
-        restart)
-            restart_service $1
-            ;;
-        shell)
-            if [[ `service_running $1` == 'ON' ]]; then 
-                docker compose exec $1 bash
-            else
-                docker compose run --rm $1 bash
-            fi
-            ;;
-        status)
-            echo $1 is `service_running $1`
-            ;;
-        up)
-            case $2 in
-                db)
-                    if [[ `service_running $1` == 'OFF' ]]; then 
-                        docker compose up -d $1
-                    fi
-                    db_wait $1
-                    ;;
-                *)
-                    docker compose up $1
-                    ;;
-            esac
-            ;;
-        build)
-            case $1 in
-                painel | ava)
-                    docker compose build $1
-                    ;;
-                *)
-                    echo -n "Só os serviços 'painel' e 'ava' tem instruções 'build'"
-                    ;;
-            esac
-            ;;
-        publish)
-            echo "[$2]"
-            case $1 in
-                ava)
-                    docker login gitlab.ifrn.edu.br:4567
-                    docker compose push $1
-                    ;;
-                *)
-                    echo -n "Só o serviço 'ava' tem instruções 'publish'"
-                    ;;
-            esac
-            ;;
-        cli)
-            case $1 in
-                cache)
-                    if [[ `service_running $1` == 'OFF' ]]; then 
-                        docker compose up -d $1
-                    fi
-                    db_wait $1
-                    ;;
-                *)
-                    echo -n "Só o serviço 'cache' tem instruções 'cli'"
-                    ;;
-            esac
-            ;;
-        psql)
-            case $1 in
-                db)
-                    docker compose exec -u postgres $1 psql
-                    ;;
-                *)
-                    echo -n "Só o serviço 'db' tem instruções 'psql'"
-                    ;;
-            esac
-            ;;
-        undeploy)
-            case $1 in
-                db)
-                    docker compose down $1
+    @classmethod
+    @property
+    def verb(cls):
+        return "exec" if Helper.service_is_running(Helper.service_name) else "run --rm"
 
-                    echo_info "Remove volume do DB"
-                    sudo rm -rf $AVA_PWD/volumes/db_data
-                    ;;
-                *)
-                    echo -n "Só o serviço 'db' tem instruções 'undeploy'"
-                    ;;
-            esac
-            ;;
+    @staticmethod
+    def read_envs():
+        with open(f"{WORKSPACE_DIR}/.env", "r") as f:
+            for l in f.readlines():
+                if l.startswith("#"):
+                    continue
+                if l.strip() == "":
+                    continue
+                varname = l.split("=", 2)[0]
+                varval = l.split("=", 2)[1][:-1]
+                if varname == "COMPOSE_PROJECT_NAME" and varval != PROJECT_NAME:
+                    raise Exception(
+                        f"No arquivo .env está como {l}, mas devia ser {varname}={PROJECT_NAME}"
+                    )
+                os.environ[varname] = varval
 
-        wait)
-            case $1 in
-                db)
-                    db_wait $1
-                    ;;
-                *)
-                    echo -n "Só o serviço 'db' tem instruções 'wait'"
-                    ;;
-            esac
-            ;;
-        *)
-            echo "As instruções são: down exec logs psql restart shell status up"
-            echo "Se for cache, também tem: cli"
-            echo "Se for db, também tem: psql undeploy wait"
-            echo "Se for ava, também tem: build publish"
-            ;;
-    esac
-    ;;
+    @staticmethod
+    def prefixed_envs(prefix: str) -> dict[str, str]:
+        return {
+            k[len(prefix) :].lower(): v
+            for k, v in os.environ.items()
+            if k.startswith(prefix)
+        }
 
-  *)
-    echo "Os contextos são: env, db, cache, ava, nginx,  sass_painel"
-    ;;
-esac
+
+class Commands:
+    def down():
+        """Para todo o ambiente ou o serviço especificado. Aplica-se a: $services_names$,env"""
+        Helper.execute(f"docker compose down {Helper.service_name}")
+
+    def restart():
+        """Para e depois inicia ambiente ou o serviço especificado, não faz lock do CLI. Aplica-se a: $services_names$,env"""
+        Helper.execute(f"docker compose down {Helper.service_name}")
+        Helper.execute(f"docker compose up -d {Helper.service_name}")
+
+    def logs():
+        """Acompanha os logs do ambiente ou o serviço especificado. Aplica-se a: $services_names$,env"""
+        Helper.execute(f"docker compose logs -f {Helper.service_name}")
+
+    def status():
+        """Mostra o status ambiente ou o serviço especificado. Aplica-se a: $services_names$,env"""
+        if Helper.scope_name == "env":
+            Helper.execute(f"docker compose ps")
+        else:
+            Helper.execute(f"docker compose ps {Helper.service_name}")
+
+    def start():
+        """Mostra o status ambiente ou o serviço especificado. Aplica-se a: env"""
+        Commands.restart()
+        Commands.logs()
+
+    def up():
+        """Inicia ambiente ou o serviço especificado, faz lock do CLI. Aplica-se a: $services_names$,env"""
+        Helper.execute(f"docker compose up {Helper.service_name}")
+
+    def exec():
+        """Executa um comando em um serviço que já esteja em execução. Aplica-se a: $services_names$,env"""
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} ", *sys.argv[3:]
+        )
+
+    def build():
+        """Constrói a imagem do serviço especificado ou de todos os serviços do ambiente. Aplica-se a: $services_names$,env"""
+        Helper.execute("docker compose build")
+
+    def publish():
+        """Publica a imagem do serviço especificado ou de todos os serviços do ambiente. Aplica-se a: $services_names$,env"""
+        Commands.build()
+        # docker login gitlab.ifrn.edu.br:4567
+        Helper.execute(f"docker compose push {Helper.service_name}")
+
+    def setup():
+        """Executa o setup do ambiente, ou seja, clona todos os repositórios e configura o PATH e o /etc/hosts. Aplica-se a: env"""
+
+        def clone_projects():
+            for proj, url in Helper.prefixed_envs("GITCLONE_").items():
+                proj_dir = f"{PROJECT_DIR}/{proj.replace('__', '/')}"
+                os.makedirs(os.path.dirname(proj_dir), 0o770, True)
+                if not os.path.exists(proj_dir):
+                    Helper.execute(f"git clone {url} {proj_dir}")
+
+        def write_hosts():
+            hosts = Helper.prefixed_envs("HOSTS")[""].split(":", 1)
+            hosts_name = hosts[0]
+            hosts_value = hosts[1]
+            with open("/etc/hosts", "r") as f:
+                if hosts_name not in f.read():
+                    print(f"Adicionando este {hosts_value} em /etc/hosts:")
+                    nls = "#" * 70
+                    new_hosts = f"\n{nls}\n## {hosts_name}\n{nls}\n{hosts_value}\n"
+                    Helper.execute(f"echo '{new_hosts}' | sudo tee -a /etc/hosts")
+
+        def mk_volumes():
+            for mkvol in Helper.prefixed_envs("MKVOLUME_").items():
+                os.makedirs(f"", 0o777, True)
+                Helper.execute(f"sudo chmod 777 {PROJECT_DIR}/volumes/{mkvol}")
+
+        def write_profiles():
+            Helper.writeShellFile(".zshrc")
+            Helper.writeShellFile(".bashrc")
+
+        Commands.down()
+        clone_projects()
+        write_hosts()
+        mk_volumes()
+        write_profiles()
+        Commands.build()
+
+    def deploy():
+        """Pára todo o ambiente, inicia os serviços de background (db e cache), constrói as imagens, iniciar os serviços web em background e acompanha o log do ambiente. Aplica-se a: env"""
+        Commands.setup()
+        Commands.start()
+
+    def undeploy():
+        """Pára todo o ambiente e remove a pasta ../volumes. Aplica-se a: env"""
+        Commands.down()
+        Helper.execute(f"sudo rm -rf {PROJECT_DIR}/volumes/{Helper.service_name}")
+
+    def cli():
+        """Executa o shell de um serviço que já esteja em execução, pode ser bash, sh, shell_plus, psql ou redis-cli, conforme o caso. Aplica-se a: $services_names$"""
+        cmd = Helper.prefixed_envs("CLI_").get(Helper.service_name, "bash")
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} {cmd} ", *sys.argv[3:]
+        )
+
+    def dbwait():
+        """Aguarda até o banco de dados estar disponível. Aplica-se a: db"""
+        while not Helper.service_is_running("db"):
+            time.sleep(3)
+
+        # until docker compose exec -u postgres $1 psql -A -c '\l'>/dev/null 2>&1; do
+        #     E=$(docker compose logs --tail 1 $1 | tail -1)
+        #     echo_warning "Postgres is unavailable - sleeping. ERROR: $E"
+        #     sleep 1
+        # done
+        # echo_success "Conectado com sucesso!"
+
+    def help():
+        """Imprime esta ajuda. Aplica-se a: env"""
+        Helper.print_help()
+
+
+if __name__ == "__main__":
+    os.chdir(f"{PROJECT_DIR}/{PROJECT_NAME}_workspace")
+    Helper.read_envs()
+    Helper.validate()
+    Helper.command()
