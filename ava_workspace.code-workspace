@@ -47,6 +47,9 @@
         {
             "name": "🎭/texteditor",
             "path": "../h5p/texteditor"
+        },
+        {
+            "path": "../sass"
         }
     ],
     "settings": {
