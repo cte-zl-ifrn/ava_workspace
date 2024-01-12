@@ -136,9 +136,21 @@ class Helper:
 
     @staticmethod
     def service_is_running(service_name):
-        return True
-        # TODO: Descobrir se determinado serviço está em execução
-        return Helper.execute(f"docker container ls | grep $COMPOSE_PROJECT_NAME-$1-1")
+        f = os.popen("docker container ps")
+        for line in f.read().splitlines():
+            if re.match(f".*{PROJECT_NAME}-{service_name}-1.*", line):
+                return True
+        return False
+
+    @staticmethod
+    def service_is_healthy(service_name):
+        f = os.popen("docker container ps")
+        for line in f.read().splitlines():
+            if re.match(f".*{PROJECT_NAME}-{service_name}-1.*", line) and re.match(
+                f".*healthy.*", line
+            ):
+                return True
+        return False
 
     @classmethod
     @property
@@ -234,10 +246,7 @@ class Commands:
 
     def status():
         """Mostra o status ambiente ou o serviço especificado. Aplica-se a: $services_names$,env"""
-        if Helper.scope_name == "env":
-            Helper.execute(f"docker compose ps")
-        else:
-            Helper.execute(f"docker compose ps {Helper.service_name}")
+        Helper.execute(f"docker compose ps {Helper.service_name}")
 
     def start():
         """Mostra o status ambiente ou o serviço especificado. Aplica-se a: env"""
@@ -318,17 +327,12 @@ class Commands:
             f"docker compose {Helper.verb} {Helper.service_name} {cmd} ", *sys.argv[3:]
         )
 
-    def dbwait():
+    def wait():
         """Aguarda até o banco de dados estar disponível. Aplica-se a: db"""
-        while not Helper.service_is_running("db"):
+        while not Helper.service_is_healthy("db"):
+            print(Color.y("Aguardando o banco de dados estar disponível..."))
             time.sleep(3)
-
-        # until docker compose exec -u postgres $1 psql -A -c '\l'>/dev/null 2>&1; do
-        #     E=$(docker compose logs --tail 1 $1 | tail -1)
-        #     echo_warning "Postgres is unavailable - sleeping. ERROR: $E"
-        #     sleep 1
-        # done
-        # echo_success "Conectado com sucesso!"
+        print(Color.g("Banco de dados disponível!"))
 
     def help():
         """Imprime esta ajuda. Aplica-se a: env"""
