@@ -40,7 +40,7 @@ services:
     painel:
         image: ctezlifrn/avapainel:1.1.0
         build:
-            context: ~/projetos/IFRN/ava/integration/painel-ava/src/python
+            context: ~/projetos/IFRN/ava/integration/painel-ava
             # additional_contexts:
             #   django-adminlte3: ../django-adminlte3
         environment:
@@ -74,7 +74,7 @@ services:
 
         volumes:
             # - '../django-adminlte3:/apps/django-adminlte3'
-            - "~/projetos/IFRN/ava/integration/painel-ava/src/python:/apps/app"
+            - "~/projetos/IFRN/ava/integration/painel-ava/src:/apps/app"
             - "~/projetos/IFRN/ava/volumes/painel_media:/var/media"
             - "~/projetos/IFRN/ava/volumes/painel_static:/var/static"
         depends_on:
