@@ -30,17 +30,17 @@ code ava_workspace.code-workspace
 Uma vez no VS Code, abra o terminal e:
 
 ```bash
-ava env deploy
+ava deploy
 ```
 
 > O **Painel** estará disponível em http://ava/painel, o primeiro usuário a acessar será declarado como superusuário e poderá fazer tudo no sistema.
 > O **Moodle** estará disponível em http://ava, o primeiro usuário a acessar será declarado como superusuário e poderá fazer tudo no sistema.
 
-Caso você deseje fazer debug do Painel AVA, tente:
+Caso você deseje fazer debug do Painel AVA (no momento com defeito), tente:
 
 ```bash
-ava painel down
-ava painel debug
+ava down painel
+ava debug painel
 ```
 
 ## Padrões de editor
@@ -64,3 +64,14 @@ pyenv install -f 3.12
 git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
 pyenv virtualenv 3.12 painel-ava
 ```
+
+## Tipo de commits
+
+-   `feat:` novas funcionalidades.
+-   `fix:` correção de bugs.
+-   `refactor:` refatoração ou performances (sem impacto em lógica).
+-   `style:` estilo ou formatação de código (sem impacto em lógica).
+-   `test:` testes.
+-   `doc:` documentação no código ou do repositório.
+-   `env:` CI/CD ou settings.
+-   `build:` build ou dependências.
