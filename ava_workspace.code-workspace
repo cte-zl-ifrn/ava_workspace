@@ -9,11 +9,15 @@
             "path": "../../common/favicons/"
         },
         {
+            "name": "🛠️/sass",
+            "path": "../sass"
+        },
+        {
             "name": "🤖/painel-ava",
             "path": "../integration/painel-ava"
         },
         {
-            "name": "📚/moodle",
+            "name": "🧊/moodle",
             "path": "../lms/moodle"
         },
         {
@@ -47,9 +51,6 @@
         {
             "name": "🎭/texteditor",
             "path": "../h5p/texteditor"
-        },
-        {
-            "path": "../sass"
         }
     ],
     "settings": {
