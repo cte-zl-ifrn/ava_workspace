@@ -52,14 +52,13 @@ class Color:
 
 
 class Helper:
-    _images = None
+    _repositories = None
     _services = None
     _commands = None
 
     @classmethod
     def print_help(cls):
         print("Comandos disponíveis:\n")
-        print("_images", Helper._images)
         for k, c in cls.commands.items():
             fixed = f"{k:8}"
             print(f"  {Color.m(fixed)} - {c.description}{Color.c(', '.join(c.scopes))}")
@@ -98,8 +97,7 @@ class Helper:
         return sys.argv[1]
 
     @classmethod
-    @property
-    def services(cls):
+    def _read_compose(cls):
         def is_service(line):
             result = re.search("^  (\\w*):$", line)
             if result is not None:
@@ -110,19 +108,34 @@ class Helper:
             result = re.search("^(    image: )(.*)$", line)
             if result is not None:
                 if len(result.groups()) > 0:
-                    print(result.group(2))
-                    return result.group(2)
+                    image = result.group(2)
+                    return image.split("/")[0] if image.count("/") > 1 else ""
 
-        if cls._services is None:
+        if cls._services is None or cls._repositories is None:
             f = os.popen("docker compose config")
             cls._services = []
-            cls._images = []
+            cls._repositories = []
             for line in f.read().splitlines():
                 if is_service(line):
                     cls._services.append(is_service(line))
                 if is_image(line):
-                    cls._images.append(is_image(line))
+                    cls._repositories.append(is_image(line))
+            cls._repositories.append("")
+            cls._repositories = set(cls._repositories)
+
+    @classmethod
+    @property
+    def services(cls):
+        if cls._services is None:
+            cls._read_compose()
         return cls._services
+
+    @classmethod
+    @property
+    def repositories(cls):
+        if cls._repositories is None:
+            cls._read_compose()
+        return cls._repositories
 
     @classmethod
     @property
@@ -249,7 +262,7 @@ class Commands:
         Helper.execute(f"docker compose ps {Helper.service_name}")
 
     def start():
-        """Mostra o status ambiente ou o serviço especificado. Aplica-se a: env"""
+        """Mostra o status ambiente ou o serviço especificado. Aplica-se a: $services_names$,env"""
         Commands.restart()
         Commands.logs()
 
@@ -265,7 +278,7 @@ class Commands:
 
     def build():
         """Constrói a imagem do serviço especificado ou de todos os serviços do ambiente. Aplica-se a: $services_names$,env"""
-        Helper.execute("docker compose build")
+        Helper.execute(f"docker compose build {Helper.service_name}")
 
     def publish():
         """Publica a imagem do serviço especificado ou de todos os serviços do ambiente. Aplica-se a: $services_names$,env"""
@@ -295,9 +308,11 @@ class Commands:
                     Helper.execute(f"echo '{new_hosts}' | sudo tee -a /etc/hosts")
 
         def mk_volumes():
-            for mkvol in Helper.prefixed_envs("MKVOLUME_").items():
-                os.makedirs(f"", 0o777, True)
-                Helper.execute(f"sudo chmod 777 {PROJECT_DIR}/volumes/{mkvol}")
+            for mkvols in Helper.prefixed_envs("MK_VOLUMES").items():
+                for mkvol in mkvols[1].split(","):
+                    vol = f"{PROJECT_DIR}/volumes/{mkvol}"
+                    os.makedirs(vol, exist_ok=True)
+                    Helper.execute(f"sudo chmod 777 {vol}")
 
         def write_profiles():
             Helper.writeShellFile(".zshrc")
@@ -321,10 +336,25 @@ class Commands:
         Helper.execute(f"sudo rm -rf {PROJECT_DIR}/volumes/{Helper.service_name}")
 
     def cli():
-        """Executa o shell de um serviço que já esteja em execução, pode ser bash, sh, shell_plus, psql ou redis-cli, conforme o caso. Aplica-se a: $services_names$"""
+        """Executa a CLI padrão de um serviço, pode ser php, shell_plus, psql ou redis-cli, caso contrário será bash usará exec se já estiver em execução, run caso contrário. Aplica-se a: $services_names$"""
         cmd = Helper.prefixed_envs("CLI_").get(Helper.service_name, "bash")
         Helper.execute(
             f"docker compose {Helper.verb} {Helper.service_name} {cmd} ", *sys.argv[3:]
+        )
+
+    def shell():
+        """Executa o bash ou sh de um serviço, usará exec se já estiver em execução, run caso contrário. Aplica-se a: $services_names$"""
+        cmd = Helper.prefixed_envs("SHELL_").get(Helper.service_name, "bash")
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} {cmd} ", *sys.argv[3:]
+        )
+
+    def shell_root():
+        """Executa o bash ou sh de um serviço, usará exec se já estiver em execução, run caso contrário. Aplica-se a: $services_names$"""
+        cmd = Helper.prefixed_envs("SHELL_").get(Helper.service_name, "bash")
+        Helper.execute(
+            f"docker compose {Helper.verb} -u root {Helper.service_name} {cmd} ",
+            *sys.argv[3:],
         )
 
     def wait():
@@ -333,6 +363,13 @@ class Commands:
             print(Color.y("Aguardando o banco de dados estar disponível..."))
             time.sleep(3)
         print(Color.g("Banco de dados disponível!"))
+
+    def login():
+        """Mostra os logins do ambiente. Aplica-se a: env"""
+        for repository in Helper.repositories:
+            repository_alias = repository if repository != "" else "hub.docker.com"
+            print(f"Login em {Color.b(repository_alias)}")
+            Helper.execute(f"docker login {repository}")
 
     def help():
         """Imprime esta ajuda. Aplica-se a: env"""
