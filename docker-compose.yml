@@ -38,7 +38,7 @@ services:
             - ava
 
     painel:
-        image: ctezlifrn/avapainel:1.1.0
+        image: ctezlifrn/avapainel:1.1.2
         build:
             context: ~/projetos/IFRN/ava/integration/painel-ava
             # additional_contexts:
@@ -75,8 +75,8 @@ services:
         volumes:
             # - '../django-adminlte3:/apps/django-adminlte3'
             - "~/projetos/IFRN/ava/integration/painel-ava/src:/apps/app"
-            - "~/projetos/IFRN/ava/volumes/painel_media:/var/media"
-            - "~/projetos/IFRN/ava/volumes/painel_static:/var/static"
+            - "~/projetos/IFRN/ava/volumes/painel/media:/var/media"
+            - "~/projetos/IFRN/ava/volumes/painel/static:/var/static"
         depends_on:
             cache:
                 condition: service_healthy
@@ -84,7 +84,7 @@ services:
                 condition: service_healthy
 
     ava:
-        image: gitlab.ifrn.edu.br:4567/ead/ava/lms/moodle:021
+        image: ctezlifrn/avamoodle:023
         build:
             context: ~/projetos/IFRN/ava/lms/moodle
             # additional_contexts:
@@ -104,41 +104,44 @@ services:
             - POSTGRES_DATABASE=postgres
         volumes:
             # Plugins
+            - "~/projetos/IFRN/ava/lms/local_suap:/var/www/html/local/suap"
+            - "~/projetos/IFRN/ava/lms/local_pnp:/var/www/html/local/pnp"
             - "~/projetos/IFRN/ava/lms/enrol_suap:/var/www/html/enrol/suap"
             - "~/projetos/IFRN/ava/lms/auth_suap:/var/www/html/auth/suap"
-            - "~/projetos/IFRN/ava/lms/local_suap:/var/www/html/local/suap"
             - "~/projetos/IFRN/ava/lms/block_suapattendance:/var/www/html/blocks/suapattendance"
             - "~/projetos/IFRN/ava/lms/theme_moove:/var/www/html/theme/moove"
-            # - '~/projetos/IFRN/ava/lms/profilefield_json:/var/www/html/user/profile/field/json'
-            # - '~/projetos/IFRN/ava/h5p/texteditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php'
-            # - '~/projetos/IFRN/ava/h5p/texteditor/h5peditor-tinymce.js:/var/www/html/h5p/h5plib/v124/joubel/editor/scripts/h5peditor-tinymce.js'
+            - "~/projetos/IFRN/ava/lms/format_suap:/var/www/html/format/suap"
+            - '~/projetos/IFRN/ava/h5p/texteditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php'
+            - '~/projetos/IFRN/ava/h5p/texteditor/h5peditor-tinymce.js:/var/www/html/h5p/h5plib/v124/joubel/editor/scripts/h5peditor-tinymce.js'
             # Data
-            - "~/projetos/IFRN/ava/volumes/moodle_data:/var/moodledata"
+            - "~/projetos/IFRN/ava/volumes/ava/moodledata:/var/moodledata"
         depends_on:
             cache:
                 condition: service_healthy
             db:
                 condition: service_healthy
 
-    # sass_painel:
-    #     image: gitlab.ifrn.edu.br:4567/ead/sass:001
-    #     command:
-    #         [
-    #             "pysass",
-    #             "--watch",
-    #             "-m",
-    #             "--sourcemap-file=/css/main.css.map",
-    #             "--sourcemap-contents",
-    #             "--sourcemap-embed",
-    #             "--omit-sourcemap-url",
-    #             "--sourcemap-root=/scss",
-    #             "-t",
-    #             "expanded",
-    #             "-I",
-    #             "/scss",
-    #             "/scss/main.scss",
-    #             "/css/main.css",
-    #         ]
-    #     volumes:
-    #         - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/scss:/scss"
-    #         - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/css:/css"
+    sass_painel:
+        image: ctezlifrn/sass:001
+        build:
+            context: ~/projetos/IFRN/ava/sass
+        command:
+            [
+                "pysass",
+                "--watch",
+                "-m",
+                "--sourcemap-file=/css/main.css.map",
+                "--sourcemap-contents",
+                "--sourcemap-embed",
+                "--omit-sourcemap-url",
+                "--sourcemap-root=/scss",
+                "-t",
+                "expanded",
+                "-I",
+                "/scss",
+                "/scss/main.scss",
+                "/css/main.css",
+            ]
+        volumes:
+            - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/scss:/scss"
+            - "~/projetos/IFRN/ava/integration/painel-ava/src/painel/static/dashboard/css:/css"
