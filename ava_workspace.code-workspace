@@ -25,6 +25,10 @@
             "path": "../lms/local_suap"
         },
         {
+            "name": "📚/local_pnp",
+            "path": "../lms/local_pnp"
+        },
+        {
             "name": "📚/theme_moove",
             "path": "../lms/theme_moove"
         },
