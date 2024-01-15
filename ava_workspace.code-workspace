@@ -58,6 +58,216 @@
         }
     ],
     "settings": {
+        "sshfs.configs": [
+            {
+                "port": 22,
+                "name": "ifrn.ava.academico.moodle",
+                "group": "ava",
+                "host": "ifrn.ava.academico.moodle",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "academico.moodle",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.aberto.moodle",
+                "group": "ava",
+                "host": "ifrn.ava.aberto.moodle",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "aberto.moodle",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.aberto.db",
+                "group": "ava",
+                "host": "ifrn.ava.aberto.db",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "aberto.db",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.painel",
+                "group": "ava",
+                "host": "ifrn.ava.painel",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "painel",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.teste.db",
+                "group": "ava",
+                "host": "ifrn.ava.teste.db",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "teste.db",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.teste.moodle",
+                "group": "ava",
+                "host": "ifrn.ava.teste.moodle",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "teste.moodle",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.academico.moodle",
+                "group": "ava",
+                "host": "ifrn.ava.academico.moodle",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "academico.moodle",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.academico.db",
+                "group": "ava",
+                "host": "ifrn.ava.academico.db",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "academico.db",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.projetos.moodle",
+                "group": "ava",
+                "host": "ifrn.ava.projetos.moodle",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "projetos.moodle",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.projetos.db",
+                "group": "ava",
+                "host": "ifrn.ava.projetos.db",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "projetos.db",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.presencial.moodle",
+                "group": "ava",
+                "host": "ifrn.ava.presencial.moodle",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "presencial.moodle",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.presencial.db",
+                "group": "ava",
+                "host": "ifrn.ava.presencial.db",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "presencial.db",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.ead.moodle",
+                "group": "ava",
+                "host": "ifrn.ava.ead.moodle",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var",
+                "label": "ead.moodle",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.ava.ead.db",
+                "group": "ava",
+                "host": "ifrn.ava.ead.db",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "ead.db",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.zl.portal.wp",
+                "group": "portal",
+                "host": "ifrn.zl.portal.wp",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/",
+                "label": "portal.wp",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.zl.portal.db",
+                "group": "portal",
+                "host": "ifrn.zl.portal.db",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "portal.db",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.infra.backup",
+                "group": "infra",
+                "host": "ifrn.infra.backup",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "backup",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.infra.monitoring",
+                "group": "infra",
+                "host": "manchester",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "monitoring",
+                "hop": "ifrn.infra.proxy"
+            },
+            {
+                "port": 22,
+                "name": "ifrn.infra.proxy",
+                "group": "infra",
+                "host": "200.137.2.6",
+                "username": "root",
+                "privateKeyPath": "$HOME/.ssh/id_rsa",
+                "root": "/var/dockers/",
+                "label": "proxy"
+            }
+        ],
         "[python]": {
             "editor.defaultFormatter": "ms-python.black-formatter"
         },
