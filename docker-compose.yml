@@ -10,6 +10,8 @@ services:
 
     db:
         image: postgres:16-alpine
+        ports:
+            - 5432:5432
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
@@ -109,6 +111,7 @@ services:
             - "~/projetos/IFRN/ava/lms/enrol_suap:/var/www/html/enrol/suap"
             - "~/projetos/IFRN/ava/lms/auth_suap:/var/www/html/auth/suap"
             - "~/projetos/IFRN/ava/lms/block_suapattendance:/var/www/html/blocks/suapattendance"
+            - "~/projetos/IFRN/ava/lms/block_plaforedu:/var/www/html/blocks/plaforedu"
             - "~/projetos/IFRN/ava/lms/theme_moove:/var/www/html/theme/moove"
             - "~/projetos/IFRN/ava/lms/format_suap:/var/www/html/format/suap"
             - '~/projetos/IFRN/ava/h5p/texteditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php'
