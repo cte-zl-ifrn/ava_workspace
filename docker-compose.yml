@@ -86,7 +86,7 @@ services:
                 condition: service_healthy
 
     ava:
-        image: ctezlifrn/avamoodle:023
+        image: ctezlifrn/avamoodle:022
         build:
             context: ~/projetos/IFRN/ava/lms/moodle
             # additional_contexts:
@@ -114,8 +114,8 @@ services:
             - "~/projetos/IFRN/ava/lms/block_plaforedu:/var/www/html/blocks/plaforedu"
             - "~/projetos/IFRN/ava/lms/theme_moove:/var/www/html/theme/moove"
             - "~/projetos/IFRN/ava/lms/format_suap:/var/www/html/format/suap"
-            - '~/projetos/IFRN/ava/h5p/texteditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php'
-            - '~/projetos/IFRN/ava/h5p/texteditor/h5peditor-tinymce.js:/var/www/html/h5p/h5plib/v124/joubel/editor/scripts/h5peditor-tinymce.js'
+            - "~/projetos/IFRN/ava/h5p/texteditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php"
+            - "~/projetos/IFRN/ava/h5p/texteditor/h5peditor-tinymce.js:/var/www/html/h5p/h5plib/v124/joubel/editor/scripts/h5peditor-tinymce.js"
             # Data
             - "~/projetos/IFRN/ava/volumes/ava/moodledata:/var/moodledata"
         depends_on:
