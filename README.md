@@ -20,7 +20,7 @@ O Ecossistema AVA do IFRN é composto do sistema de integração (Painel e Middl
 Este projeto em docker compose assume que você não tenha aplicações rodando na porta 80, ou seja, pare o serviço que está na porta 80 ou faça as configurações necessárias vocês mesmo. O script `./ava` tem atalhos para a maioria dos comandos que você necessitará. A instrução `./ava env setup` no seu PC criará automaticamente uma entrada no `/etc/hosts` para o hostname `ava` apontando para `127.0.02`. Isso é necessário para simplificar o cenário de desenvolvimento local.
 
 ```bash
-curl https://gist.githubusercontent.com/cte-ead/4cbd7b0eda1be2a2622027aff6d219b2/raw/ffc6f3e6a24b26050f3e70df348798ad95687844/ava-setup-env-dev | $SHELL
+curl https://github.com/cte-zl-ifrn/.github/blob/main/profile/ava-setup-env-dev.sh | $SHELL
 
 cd ~/projetos/IFRN/ava/ava_workspace
 
@@ -57,6 +57,14 @@ Neste projeto usamos o editor VSCode como referência, com os seguintes plugins 
 ### AlmaLinux 9
 
 ```bash
+curl https://pyenv.run | bash
+
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+
+source ~/.bashrc
+
 sudo yum groupinstall -y "Development Tools"
 sudo yum install -y openssl-devel tk-devel sqlite-devel ncurses-devel readline-devel
 curl https://pyenv.run | bash
