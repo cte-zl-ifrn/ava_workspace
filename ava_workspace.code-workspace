@@ -1,60 +1,60 @@
 {
     "folders": [
         {
-            "name": "🛠️/ava_workspace",
+            "name": "🛠️ ava_workspace",
             "path": "."
         },
         {
-            "name": "🛠️/favicons",
-            "path": "../../common/favicons/"
-        },
-        {
-            "name": "🛠️/sass",
-            "path": "../sass"
-        },
-        {
-            "name": "🤖/painel-ava",
+            "name": "🤖 painel-ava",
             "path": "../integration/painel-ava"
         },
         {
-            "name": "🧊/moodle",
+            "name": "🧊 docker moodle",
             "path": "../lms/moodle"
         },
         {
-            "name": "📚/local_suap",
+            "name": "📚 local suap",
             "path": "../lms/local_suap"
         },
         {
-            "name": "📚/local_pnp",
+            "name": "📚 local pnp",
             "path": "../lms/local_pnp"
         },
         {
-            "name": "📚/theme_moove",
+            "name": "📚 theme suap",
             "path": "../lms/theme_moove"
         },
         {
-            "name": "📚/auth_suap",
+            "name": "📚 auth suap",
             "path": "../lms/auth_suap"
         },
         {
-            "name": "📚/enrol_suap",
+            "name": "📚 enrol suap",
             "path": "../lms/enrol_suap"
         },
         {
-            "name": "📚/block_suapattendance",
+            "name": "📚 block suapattendance",
             "path": "../lms/block_suapattendance"
         },
         {
-            "name": "📚/format_suap",
+            "name": "📚 format suap",
             "path": "../lms/format_suap"
         },
         {
-            "name": "🎭/codehighlighter",
+            "name": "🎭 h5p codehighlighter",
             "path": "../h5p/codehighlighter"
         },
         {
-            "name": "🎭/texteditor",
+            "name": "🎭 h5p texteditor",
             "path": "../h5p/texteditor"
+        },
+        {
+            "name": "🛠️ favicons",
+            "path": "../common/favicons/"
+        },
+        {
+            "name": "🛠️ sass",
+            "path": "../common/sass"
         }
     ],
     "settings": {
