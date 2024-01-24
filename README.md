@@ -4,7 +4,7 @@
 
 O Ecossistema AVA do IFRN é composto do sistema de integração (Painel e Middlware) e vários Moodles construídos como imagens Docker.
 
-> Neste projeto usamos o [Docker](https://docs.docker.com/engine/install/) e o [Docker Compose Plugin](https://docs.docker.com/compose/install/compose-plugin/#:~:text=%20Install%20the%20plugin%20manually%20%F0%9F%94%97%20%201,of%20Compose%20you%20want%20to%20use.%20More%20) (não o [docker-compose](https://docs.docker.com/compose/install/) 😎). O setup foi todo testado usando o Linux, Mac OS e WSL2.
+> Neste projeto usamos o [Docker 24+](https://docs.docker.com/engine/install/). O setup foi todo testado usando o Linux, Mac OS e WSL2.
 
 > Os containeres terão o prefixo `ava-`, que é um acrônimo para "Ambiente Virtual de ensino e Aprendizagem".
 
@@ -17,7 +17,7 @@ O Ecossistema AVA do IFRN é composto do sistema de integração (Painel e Middl
 
 ## Como iniciar o desenvolvimento
 
-Este projeto em docker compose assume que você não tenha aplicações rodando na porta 80, ou seja, pare o serviço que está na porta 80 ou faça as configurações necessárias vocês mesmo. O script `./ava` tem atalhos para a maioria dos comandos que você necessitará. A instrução `./ava env setup` no seu PC criará automaticamente uma entrada no `/etc/hosts` para o hostname `ava` apontando para `127.0.02`. Isso é necessário para simplificar o cenário de desenvolvimento local.
+Este projeto em docker compose assume que você não tenha aplicações rodando na porta 80, ou seja, pare o serviço que está na porta 80 ou faça as configurações necessárias vocês mesmo. O script `ava` tem atalhos para a maioria dos comandos que você necessitará. A instrução `curl ...` criará automaticamente uma entrada no `/etc/hosts` para o hostname `ava` apontando para `127.0.02`. Isso é necessário para simplificar o cenário de desenvolvimento local. Se você estiver em WSL2 será necessário editar o `c:\windows\System32\drivers\etc\hosts` usando um editor de textos como administrador no Windows.
 
 ```bash
 curl https://github.com/cte-zl-ifrn/.github/blob/main/profile/ava-setup-env-dev.sh | $SHELL
