@@ -86,7 +86,7 @@ services:
                 condition: service_healthy
 
     ava:
-        image: ctezlifrn/avamoodle:022
+        image: ctezlifrn/avamoodle:024
         build:
             context: ~/projetos/IFRN/ava/lms/moodle
             # additional_contexts:
