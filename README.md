@@ -20,7 +20,7 @@ O Ecossistema AVA do IFRN é composto do sistema de integração (Painel e Middl
 Este projeto em docker compose assume que você não tenha aplicações rodando na porta 80, ou seja, pare o serviço que está na porta 80 ou faça as configurações necessárias vocês mesmo. O script `ava` tem atalhos para a maioria dos comandos que você necessitará. A instrução `curl ...` criará automaticamente uma entrada no `/etc/hosts` para o hostname `ava` apontando para `127.0.02`. Isso é necessário para simplificar o cenário de desenvolvimento local. Se você estiver em WSL2 será necessário editar o `c:\windows\System32\drivers\etc\hosts` usando um editor de textos como administrador no Windows.
 
 ```bash
-curl https://github.com/cte-zl-ifrn/.github/blob/main/profile/ava-setup-env-dev.sh | $SHELL
+curl https://raw.githubusercontent.com/cte-zl-ifrn/.github/main/profile/ava-setup-env-dev.sh | $SHELL
 
 cd ~/projetos/IFRN/ava/ava_workspace
 
