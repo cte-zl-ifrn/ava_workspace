@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import re
 import os
@@ -207,11 +207,12 @@ class Helper:
 
     @staticmethod
     def writeShellFile(filename):
-        with open(f"{HOME}/{filename}", "r") as f:
-            if f"{PROJECT_NAME}_workspace" not in f.read():
-                Helper.execute(f"echo 'PATH=$PATH:{WORKSPACE_DIR}' >> ~/{filename}")
-                print("Lembre-se de executar o comando abaixo:")
-                print(Color.g(f"source ~/{filename}"), "\n")
+        if os.path.exists(f"{HOME}/{filename}"):
+            with open(f"{HOME}/{filename}", "r") as f:
+                if f"{PROJECT_NAME}_workspace" not in f.read():
+                    Helper.execute(f"echo 'PATH=$PATH:{WORKSPACE_DIR}' >> ~/{filename}")
+                    print("Lembre-se de executar o comando abaixo:")
+                    print(Color.g(f"source ~/{filename}"), "\n")
 
     @classmethod
     @property
@@ -235,7 +236,7 @@ class Helper:
                 os.environ[varname] = varval
 
     @staticmethod
-    def prefixed_envs(prefix: str) -> dict[str, str]:
+    def prefixed_envs(prefix):
         return {
             k[len(prefix) :].lower(): v
             for k, v in os.environ.items()
@@ -315,15 +316,15 @@ class Commands:
                     Helper.execute(f"sudo chmod 777 {vol}")
 
         def write_profiles():
-            Helper.writeShellFile(".zshrc")
             Helper.writeShellFile(".bashrc")
+            Helper.writeShellFile(".zshrc")
 
         Commands.down()
         clone_projects()
         write_hosts()
         mk_volumes()
-        write_profiles()
         Commands.build()
+        write_profiles()
 
     def deploy():
         """Pára todo o ambiente, inicia os serviços de background (db e cache), constrói as imagens, iniciar os serviços web em background e acompanha o log do ambiente. Aplica-se a: env"""
@@ -334,6 +335,16 @@ class Commands:
         """Pára todo o ambiente e remove a pasta ../volumes. Aplica-se a: env"""
         Commands.down()
         Helper.execute(f"sudo rm -rf {PROJECT_DIR}/volumes/{Helper.service_name}")
+
+    def pull():
+        """Pára todo o ambiente e remove a pasta ../volumes. Aplica-se a: env"""
+        for proj, url in Helper.prefixed_envs("GITCLONE_").items():
+            proj_dir = f"{PROJECT_DIR}/{proj.replace('__', '/')}"
+            if os.path.exists(proj_dir):
+                print(f"Atualizando o código de {Color.m(proj_dir)}")
+                Helper.execute(f"cd {proj_dir};git pull")
+            else:
+                print(f"O projeto {proj_dir} NÃO foi clonado ainda.")
 
     def cli():
         """Executa a CLI padrão de um serviço, pode ser php, shell_plus, psql ou redis-cli, caso contrário será bash usará exec se já estiver em execução, run caso contrário. Aplica-se a: $services_names$"""
@@ -370,6 +381,48 @@ class Commands:
             repository_alias = repository if repository != "" else "hub.docker.com"
             print(f"Login em {Color.b(repository_alias)}")
             Helper.execute(f"docker login {repository}")
+
+    def manage():
+        """Mostra os logins do ambiente. Aplica-se a: $services_names$"""
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} python3 manage.py ",
+            *sys.argv[3:],
+        )
+
+    def makemigrations():
+        """Mostra os logins do ambiente. Aplica-se a: $services_names$"""
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} python3 manage.py makemigrations",
+            *sys.argv[3:],
+        )
+
+    def migrate():
+        """Mostra os logins do ambiente. Aplica-se a: $services_names$"""
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} python3 manage.py migrate",
+            *sys.argv[3:],
+        )
+
+    def show_urls():
+        """Mostra os logins do ambiente. Aplica-se a: $services_names$"""
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} python3 manage.py show_urls",
+            *sys.argv[3:],
+        )
+
+    def test():
+        """Mostra os logins do ambiente. Aplica-se a: $services_names$"""
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} python3 manage.py test",
+            *sys.argv[3:],
+        )
+
+    def testserver():
+        """Mostra os logins do ambiente. Aplica-se a: $services_names$"""
+        Helper.execute(
+            f"docker compose {Helper.verb} {Helper.service_name} python3 manage.py testserver",
+            *sys.argv[3:],
+        )
 
     def help():
         """Imprime esta ajuda. Aplica-se a: env"""
