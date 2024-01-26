@@ -338,6 +338,7 @@ class Commands:
 
     def pull():
         """Pára todo o ambiente e remove a pasta ../volumes. Aplica-se a: env"""
+        Helper.execute(f"cd {WORKSPACE_DIR};git pull")
         for proj, url in Helper.prefixed_envs("GITCLONE_").items():
             proj_dir = f"{PROJECT_DIR}/{proj.replace('__', '/')}"
             if os.path.exists(proj_dir):
