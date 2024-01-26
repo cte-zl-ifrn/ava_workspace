@@ -313,7 +313,7 @@ class Commands:
                 for mkvol in mkvols[1].split(","):
                     vol = f"{PROJECT_DIR}/volumes/{mkvol}"
                     os.makedirs(vol, exist_ok=True)
-                    Helper.execute(f"sudo chmod 777 {vol}")
+                    Helper.execute(f"sudo chmod -R 777 {vol}")
 
         def write_profiles():
             Helper.writeShellFile(".bashrc")
