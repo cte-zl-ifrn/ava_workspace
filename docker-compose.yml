@@ -105,6 +105,7 @@ services:
             - CFG_SHORTNAME=AVA-ZL
             - POSTGRES_DATABASE=postgres
         volumes:
+        
             # Plugins
             - "~/projetos/IFRN/ava/lms/local_suap:/var/www/html/local/suap"
             - "~/projetos/IFRN/ava/lms/local_pnp:/var/www/html/local/pnp"
