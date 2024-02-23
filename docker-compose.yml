@@ -105,7 +105,6 @@ services:
             - CFG_SHORTNAME=AVA-ZL
             - POSTGRES_DATABASE=postgres
         volumes:
-        
             # Plugins
             - "~/projetos/IFRN/ava/lms/local_suap:/var/www/html/local/suap"
             - "~/projetos/IFRN/ava/lms/local_pnp:/var/www/html/local/pnp"
@@ -116,6 +115,14 @@ services:
             - "~/projetos/IFRN/ava/lms/format_suap:/var/www/html/format/suap"
             - "~/projetos/IFRN/ava/h5p/texteditor/hacks/h5peditor.class.php:/var/www/html/h5p/h5plib/v124/joubel/editor/h5peditor.class.php"
             - "~/projetos/IFRN/ava/h5p/texteditor/h5peditor-tinymce.js:/var/www/html/h5p/h5plib/v124/joubel/editor/scripts/h5peditor-tinymce.js"
+
+            - "~/projetos/IFRN/ava/h5p/texteditor/tinymce:/var/www/html/h5p/h5plib/v124/joubel/tinymce"
+
+            - "~/projetos/IFRN/ava/h5p/texteditor/tinymce/js/tinymce/icons:/var/www//html/h5p/h5plib/v124/joubel/editor/scripts/icons"
+            - "~/projetos/IFRN/ava/h5p/texteditor/tinymce/js/tinymce/themes:/var/www//html/h5p/h5plib/v124/joubel/editor/scripts/themes"
+            - "~/projetos/IFRN/ava/h5p/texteditor/tinymce/js/tinymce/plugins:/var/www//html/h5p/h5plib/v124/joubel/editor/scripts/plugins"
+            - "~/projetos/IFRN/ava/h5p/texteditor/tinymce/js/tinymce/models:/var/www//html/h5p/h5plib/v124/joubel/editor/scripts/models"
+            - "~/projetos/IFRN/ava/h5p/texteditor/tinymce/js/tinymce/skins:/var/www//html/h5p/h5plib/v124/joubel/editor/scripts/skins"
 
             # Data
             - "~/projetos/IFRN/ava/volumes/ava/moodledata:/var/moodledata"
